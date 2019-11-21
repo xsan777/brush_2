@@ -1,0 +1,217 @@
+{% extends 'basc.html' %}
+{% block head %}
+    <link rel="stylesheet" href="/static/css/shops.css">
+{% endblock %}
+{% block content %}
+    <h2>添加店铺</h2>
+    <hr>
+    <form class="form-inline" action="" method="post">
+        <div class="form-group">
+            <label for="exampleInputName2"><span style="color: red">*</span>&nbsp;&nbsp;&nbsp;店铺名:</label>
+            {{ add_shop_form.shop_name }}
+            <span style="color: red" id="err"></span>
+        </div>&nbsp;&nbsp;&nbsp;
+        <div class="form-group">
+            <label for="exampleInputName2"><span style="color: red">*</span>&nbsp;&nbsp;&nbsp;店铺总账户:</label>
+            <select name="total_brank_account" id="" class="form-control">
+                {% for total_brank in total_brank_all %}
+                    <option value="{{ total_brank.total_account_name }}">{{ total_brank.total_account_name }}</option>
+                {% endfor %}
+            </select>
+            <span style="color: red" id="err"></span>
+        </div>
+        <input type="submit" class="btn btn-default" value="创建" id="add_shop">
+        {% csrf_token %}
+    </form>
+    <h2>店铺清单</h2>
+    <hr>
+    {#    搜索店铺#}
+    <div class="col-lg-offset-8">
+        <form action="" class="form-horizontal">
+            <div class="form-group">
+                <label for="inputEmail3" class="col-sm-3 control-label">搜索店铺</label>
+                <div class="col-sm-4">
+                    <input type="text" class="form-control" id="inputEmail3" placeholder="店铺名" name="shop_name">
+                </div>
+                <input type="submit" class="btn btn-default" value="查询">
+            </div>
+            {% csrf_token %}
+        </form>
+    </div>
+    {#展示数据#}
+    <div id="tabless">
+        <table class="table table-striped">
+            <tr>
+                <td>序号</td>
+                <td>店铺名</td>
+                <td>店铺运营</td>
+                <td>店铺总账户</td>
+                <th>操作</th>
+            </tr>
+            {% for table in tables %}
+                <tr id="{{ forloop.counter }}">
+                <td id="num">{{ forloop.counter }}</td>
+                <td id="ids">{{ table.id }}</td>
+                <td>{{ table.shop_name }}</td>
+                <td>{{ table.shop_owners }}</td>
+                <td>{{ table.own_total_brank }}</td>
+                <td><a class="glyphicon glyphicon-pencil" href="javascript:void(0);" onclick="edit_data({{ table.id }},this)" title="编辑"
+                       id="bsd"></a>
+                    <a class="glyphicon glyphicon-remove" href="javascript:void(0);" onclick="delete_data({{ table.id }},this)" title="删除"
+                       id="dele"></a>
+                </td>
+            {% endfor %}
+        </table>
+
+    </div>
+    {#修改店铺名#}
+    <div class="modal fade" tabindex="-1" role="dialog" id="edit_model">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">修改店铺信息</h4>
+                </div>
+                {#修改表单#}
+                <div class="modal-body">
+                    <form class="form-horizontal" method="post" action="/edit_shop/" id="edit_data">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <label for="shopname" class="col-sm-2 control-label"><span style="color: red">*</span>&nbsp;&nbsp;&nbsp; 店铺名</label>
+                            <div class="col-sm-10">
+                                {{ edit_shop_form.shop_name }}
+                                <span style="color: red" id="err2"></span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="exampleInputName2" class="col-sm-2 control-label"><span
+                                    style="color: red">*</span>&nbsp;&nbsp;&nbsp;总账户名</label>
+                            <div class="col-sm-10">
+                                <select name="edit_total_account_name" id="edit_total_account_name" class="form-control">
+                                    {% for total_brank_name in total_brank_all %}
+                                        <option value="{{ total_brank_name.total_account_name }}">{{ total_brank_name.total_account_name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" id="update_ids" placeholder="ids" name="id">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-sm-offset-2 col-sm-10">
+                                <button type="button" class="btn btn-default" id="edit_shop" onclick="make_edit()">修改</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+{% endblock %}
+{% block js %}
+    <script>
+        $('td#ids').hide();
+        $('#update_ids').hide();
+    </script>
+    <script>
+        {#验证店铺名是否存在#}
+
+        function verification_shopname() {
+            var shopname = $('input#shop_name').val();
+            $.ajax({
+                url: "/verification_shopname/",
+                type: "GET",
+                dataType: 'json',
+                data: {'shopname': shopname},
+                async: false,
+                success: function (msg) {
+                    $('#err').text(msg);
+                    if (msg == '店铺名已存在') {
+                        $('#add_shop').attr('type', 'button')
+                    }
+                    else {
+                        $('#add_shop').attr('type', 'submit')
+                    }
+                }
+
+            });
+        }
+
+        {#修改验证#}
+
+        function edit_verification_shopname() {
+            var shopname = $('input#edit_shop_name').val();
+            $.ajax({
+                url: "/verification_shopname/",
+                type: "GET",
+                dataType: 'json',
+                data: {'shopname': shopname},
+                async: false,
+                success: function (msg) {
+                    $('#err2').text(msg);
+                    if (msg == '店铺名已存在') {
+                        $('#edit_shop').attr('type', 'button')
+                    }
+                    else {
+                        $('#edit_shop').attr('type', 'submit')
+                    }
+                }
+
+            });
+        }
+    </script>
+    {#修改店铺名#}
+    <script>
+        function edit_data(mm, sd) {
+            $.ajax({
+                url: "/edit_shop/",
+                type: "GET",
+                dataType: 'json',
+                data: {'id': mm},
+                async: true,
+                success: function (arg) {
+                    $('#edit_shop_name').attr('value', arg['shopname']);
+                    $('#update_ids').attr('value', arg['ids']);
+                    $('#edit_model').modal('show');
+                }
+            })
+        }
+    </script>
+    {# 确定修改 #}
+    <script>
+        function make_edit() {
+            $.ajax({
+                url: "/edit_shop/",
+                type: "POST",
+                dataType: 'json',
+                data: $('#edit_data').serialize(),
+                async: false,
+                success: function (arg) {
+                    if (arg != '') {
+                        {#window.location.replace('/shopmanagement/');#}
+                        alert(arg)
+                    }
+                }
+            });
+            window.location.replace('/shopmanagement/');
+        }
+    </script>
+    {#删除店铺#}
+    <script>
+        function delete_data(mm, sd) {
+            $.ajax({
+                url: "/deletes_shop/",
+                type: "GET",
+                dataType: 'json',
+                data: {'id': mm},
+                async: false,
+                success: function () {
+                    window.location.reload()
+                }
+            });
+            window.location.replace("/shopmanagement/")
+        }
+    </script>
+{% endblock %}

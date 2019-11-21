@@ -1,0 +1,89 @@
+{% extends 'basc.html' %}
+{% block head %}
+    <link rel="stylesheet" href="/static/css/check_account.css">
+{% endblock %}
+{% block content %}
+    <h2>店铺账单</h2>
+    <hr>
+    <form class="form-inline" id="check_data" method="post">
+        <div class="form-group">
+            <label for="exampleInputName2">日期:</label>
+            <input type="date" class="form-control" value="{{ now_time }}" name="check_data" id="search_date" onchange="cheage_down()">
+        </div>
+        <div class="form-group">
+            <label for="exampleInputName2">店铺名:</label>
+            <select name="shop_name" id="shop_name" class="form-control" onchange="cheage_down()">
+                {% for acc in account %}
+                    <option value="{{ acc.shopname }}">{{ acc.shopname }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <input type="submit" value="查询" class="btn btn-default">
+        <a href="" id="down"><input type="button" value="按日下载" class="btn btn-default"></a>
+        <a href="" id="down2"><input type="button" value="按月下载" class="btn btn-default"></a>
+        {% csrf_token %}
+    </form>
+    <div id="tabless">
+        <table class="table table-striped">
+            <tr>
+                <th>序号</th>
+                <th>店铺</th>
+                <th>旺旺号</th>
+                <th>线上订单号</th>
+                <th>成交日期</th>
+                <th>付款类型</th>
+                <th>付款金额</th>
+                <th>付款账户</th>
+                <th>备注</th>
+                <th>创建时间</th>
+                <th>操作人</th>
+            </tr>
+            {% for table in tables %}
+                <tr id="{{ forloop.counter }}">
+                    <td id="num">{{ forloop.counter }}</td>
+                    <td>{{ table.shopname }}</td>
+                    <td>{{ table.wang_wang_number }}</td>
+                    <td>{{ table.online_order_number }}</td>
+                    <td>{{ table.transaction_data }}</td>
+                    <td>{{ table.payment_type }}</td>
+                    <td>{{ table.payment_amount }}</td>
+                    <td>{{ table.payment_account.account_name }}</td>
+                    <td>{{ table.remarks }}</td>
+                    <td>{{ table.add_time }}</td>
+                    <td>{{ table.operator.username }}</td>
+                </tr>
+            {% endfor %}
+        </table>
+    </div>
+    <h3 class="col-lg-offset-10">店铺花销：<span id="pay">{{ pay_money }}</span>
+    </h3>
+{% endblock %}
+{% block js %}
+    {#下载#}
+    <script>
+        var search_date = $('#search_date').val();
+        var search_shop = $('#shop_name').val();
+        var down_url = '/down_shop_bill/?check_data=' + search_date + '&shop_name=' + search_shop;
+        var down_url2 = '/down_shop_bill2/?check_data=' + search_date + '&shop_name=' + search_shop;
+        $('#down').attr('href', down_url);
+        $('#down2').attr('href', down_url2);
+
+        function cheage_down() {
+            var search_date = $('#search_date').val();
+            var search_shop = $('#shop_name').val();
+            var down_url = '/down_shop_bill/?check_data=' + search_date + '&shop_name=' + search_shop;
+            var down_url2 = '/down_shop_bill2/?check_data=' + search_date + '&shop_name=' + search_shop;
+            $('#down').attr('href', down_url);
+            $('#down2').attr('href', down_url2);
+        }
+    </script>
+    {#默认选中店铺#}
+    <script>
+        $("#shop_name").find("option").each(function () {
+            var ff = '{{ shop_name }}';
+            if ($(this).val() == ff) {
+                $(this).attr("selected", "selected");
+            }
+        });
+    </script>
+{% endblock %}

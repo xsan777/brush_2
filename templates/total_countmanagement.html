@@ -1,0 +1,110 @@
+{% extends 'basc.html' %}
+{% block head %}
+    <link rel="stylesheet" href="/static/css/countmanagement.css">
+{% endblock %}
+{% block content %}
+    <h2>总账户核对情况</h2>
+    <hr>
+    {#    查询日期设置#}
+    <div class="col-lg-5">
+        <form action="/search_total_count/" class="form-horizontal" id="search_form">
+            <div class="form-group">
+                <div class="col-sm-4">
+                    <input type="date" class="form-control" id="update_transaction_data" name="search_date" value="{{ nowss }}" onchange="down_url()">
+                </div>
+                <input type="submit" value="查询" class="btn btn-default" onclick="search()">
+                <a href="" class="btn btn-default" type="button" id="down">下载</a>
+            </div>
+            {% csrf_token %}
+        </form>
+    </div>
+    {#    显示数据#}
+    <div id="tabless">
+        <table class="table table-striped">
+            <tr>
+                <th>序号</th>
+                <th>日期</th>
+                <th>总账户名</th>
+                <th>初始资金</th>
+                <th>支出资金</th>
+                <th>结余资金</th>
+                <th>前一天结余金额</th>
+                <th>转账资金截图</th>
+                <th>结余资金截图</th>
+                <th>操作人</th>
+                <th>确认状态</th>
+            </tr>
+            {% for table in count %}
+                <tr id="{{ forloop.counter }}">
+                    <td id="num">{{ forloop.counter }}</td>
+                    <td>{{ table.datess }}</td>
+                    <td>{{ table.account_name.total_account_name }}</td>
+                    <td>{{ table.start_money }}</td>
+                    <td>{{ table.payment_money }}</td>
+                    <td>{{ table.end_money }}</td>
+                    <td>{{ table.last_end_money }}</td>
+                    {% if  table.start_money_img %}
+                        <td><a href="/media/{{ table.start_money_img }}" onclick="big_img('{{ table.start_money_img }}')"
+                               target="view_window"><img src="/media/{{ table.start_money_img }}" alt="" id="smar_img"></a></td>
+                    {% else %}
+                        <td></td>
+                    {% endif %}
+                    {% if  table.end_money_img %}
+                        <td><a href="/media/{{ table.end_money_img }}" target="view_window"><img src="/media/{{ table.end_money_img }}" alt=""
+                                                                                                 id="smar_img"></a></td>
+                    {% else %}
+                        <td></td>
+                    {% endif %}
+                    <td>{{ table.operator }}</td>
+                    {% if table.makes == 'False' %}
+                        <td><span class="glyphicon glyphicon-remove" style="color: red"></span></td>
+                    {% else %}
+                        <td><span class="glyphicon glyphicon-ok" style="color: green"></span></td>
+                    {% endif %}
+                </tr>
+            {% endfor %}
+        </table>
+    </div>
+{% endblock %}
+{% block js %}
+    <script>
+        $('#update_ids').hide();
+        $('#big_imgs').hide();
+    </script>
+    {#    <script>#}
+    {#        function big_img(img_url) {#}
+    {#            $('#big_imgs').attr('src', '/media/' + img_url);#}
+    {#            $('#big_img_model').show();#}
+    {#        }#}
+    {#    </script>#}
+    {#查询验证#}
+    <script>
+        function search() {
+            var update_transaction_data = $('#update_transaction_data').val()
+            if (update_transaction_data == '') {
+                alert('查询时间不能为空');
+                return
+            }
+            else {
+                $.ajax({
+                    url: "/search_count/",
+                    type: "GET",
+                    dataType: 'json',
+                    data: $('#search_form').serialize(),
+                    async: true,
+                })
+            }
+        }
+    </script>
+    {# 动态生成下载链接 #}
+    <script>
+        var search_data = $('#update_transaction_data').val();
+        var url = '/download_search_total_count/?search_date=' + search_data;
+        $('#down').attr('href', url);
+        function down_url() {
+            var search_data = $('#update_transaction_data').val();
+            var url = '/download_search_total_count/?search_date=' + search_data;
+            $('#down').attr('href', url);
+        }
+    </script>
+{% endblock %}

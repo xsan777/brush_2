@@ -1,0 +1,519 @@
+{% extends 'basc2.html' %}
+{% block content %}
+    <h2>喝酒数据录入</h2>
+    <hr>
+    {#添加数据#}
+    <form class="form-inline " id="add_data" method="post">
+        <div class="form-group">
+            <select name="shopname" id="" class="form-control">
+                {% for shopss in shops %}
+                    <option value="{{ shopss }}">{{ shopss }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group">
+            {{ add_brush_form.qq_or_weixin }}
+        </div>
+        <div class="form-group">
+            {{ add_brush_form.wang_wang_number }}<a href="javascript:void(0);"><i class="fa fa-user-circle-o" aria-hidden="true"
+                                                                                  id="wang_wang_number" data-container="body"
+                                                                                  data-toggle="popover"
+                                                                                  data-trigger="hover"
+                                                                                  data-placement="bottom"
+                                                                                  id="search_wangwang"
+                                                                                  data-html="true"></i></a>&nbsp;
+        </div>
+        <div class="form-group">
+            <input type="text" placeholder="线上订单号" class="form-control" id="online_order_number" name="online_order_number">
+        </div>
+        <div class="form-group">
+            <input type="date" class="form-control" value="{{ now_time }}" name="transaction_data">
+        </div>
+        <div class="form-group">
+            <select name="payment_type" id="payment_type" class="form-control">
+                {% for pay_type in payment_type_all %}
+                    <option value="{{ pay_type.types }}">{{ pay_type.types }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group">
+            {{ add_brush_form.payment_amount }}
+        </div>
+        <div class="form-group">
+            <select name="payment_account" id="" class="form-control">
+                {% for acc in account %}
+                    <option value="{{ acc.account_name }}">{{ acc.account_name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="form-group ">
+            <input type="text" class="form-control col-lg-1" id="remarks" placeholder="备注" name="remarks">
+        </div>
+        <input type="button" value="添加" class="btn btn-default" onclick="addFunction()">
+        {% csrf_token %}
+    </form>
+    <h2>喝酒数据 <span style="font-size: small">(根据创建时间倒序显示)</span></h2>
+    <hr>
+    {#显示数据#}
+    <table class="table table-striped">
+        <tr>
+            <th>创建时间</th>
+            <th>店铺</th>
+            <th>QQ或微信</th>
+            <th>旺旺号</th>
+            <th>线上订单号</th>
+            <th>成交日期</th>
+            <th>付款类型</th>
+            <th>付款金额</th>
+            <th>付款账户</th>
+            <th>备注</th>
+            <th>操作</th>
+        </tr>
+        <tr id="0">
+            <td id="add_time"></td>
+            <td id="shopname"></td>
+            <td id="qq_or_weixin"></td>
+            <td id="wang_wang_number"><span data-container="body" data-toggle="popover" data-placement="right" id="search_wangwang2"
+                                            data-trigger="hover" data-html="true"></span></td>
+            <td id="online_order_number"></td>
+            <td id="transaction_data"></td>
+            <td id="payment_type"></td>
+            <td id="payment_amount"></td>
+            <td id="payment_account"></td>
+            <td id="remarks"></td>
+            <td><a class="glyphicon glyphicon-pencil" href="javascript:void(0);" onclick="edit_data({{ table.id }},this)" title="编辑" id="bsd"></a>
+                <a class="glyphicon glyphicon-remove" href="javascript:void(0);" onclick="delete_data({{ table.id }},this)" title="删除" id="dele"></a>
+            </td>
+        </tr>
+        {% for table in tables %}
+            <tr id="{{ forloop.counter }}">
+                {#<td id="num">{{ forloop.counter }}</td>#}
+                <td>{{ table.add_time }}</td>
+                <td>{{ table.shopname }}</td>
+                <td>{{ table.qq_or_weixin }}</td>
+                <td><span data-container="body" data-toggle="popover" data-placement="right" data-content=""
+                          id="search_wangwang2" data-html="true" data-trigger="hover">{{ table.wang_wang_number }}</span></td>
+                <td>{{ table.online_order_number }}</td>
+                <td>{{ table.transaction_data }}</td>
+                <td>{{ table.payment_type }}</td>
+                <td>{{ table.payment_amount }}</td>
+                <td>{{ table.payment_account.account_name }}</td>
+                <td>{{ table.remarks }}</td>
+                <td><a class="glyphicon glyphicon-pencil" href="javascript:void(0);" onclick="edit_data({{ table.id }},this)" title="编辑" id="bsd"></a>
+                    <a class="glyphicon glyphicon-remove" href="javascript:void(0);" onclick="delete_data({{ table.id }},this)" title="删除"
+                       id="dele"></a>
+                </td>
+            </tr>
+        {% endfor %}
+    </table>
+    {#修改数据的模态框#}
+    <div class="modal fade" tabindex="-1" role="dialog" id="edit_model">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="gridSystemModalLabel">修改喝酒数据</h4>
+                </div>
+                <div class="modal-body">
+                    <form class="form-horizontal" id="update_form" method="post" action="/edit/">
+                        <div class="form-group">
+                            <label for="inputEmail3" class="col-sm-3 control-label">店铺名</label>
+                            <div class="col-sm-9">
+                                <select name="shopname" class="form-control" id="update_shopname">
+                                    {% for shopss in shops %}
+                                        <option value="{{ shopss }}">{{ shopss }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="inputEmail3" class="col-sm-3 control-label">QQ或微信</label>
+                            <div class="col-sm-9">
+                                {{ edit_brush_form.qq_or_weixin }}
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="inputEmail3" class="col-sm-3 control-label">旺旺号</label>
+                            <div class="col-sm-9">
+                                {{ edit_brush_form.wang_wang_number }}
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="inputEmail3" class="col-sm-3 control-label">线上订单号</label>
+                            <div class="col-sm-9">
+                                {{ edit_brush_form.online_order_number }}
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="inputEmail3" class="col-sm-3 control-label">成交日期</label>
+                            <div class="col-sm-9">
+                                <input type="date" class="form-control" id="update_transaction_data" name="transaction_data">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="inputEmail3" class="col-sm-3 control-label">付款类型</label>
+                            <div class="col-sm-9">
+                                <select name="payment_type" id="update_payment_type" class="form-control">
+                                    {% for pay_type in payment_type_all %}
+                                        <option value="{{ pay_type.types }}">{{ pay_type.types }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="inputEmail3" class="col-sm-3 control-label">付款金额</label>
+                            <div class="col-sm-9">
+                                {{ edit_brush_form.payment_amount }}
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="inputEmail3" class="col-sm-3 control-label">付款账户</label>
+                            <div class="col-sm-9">
+                                <select name="payment_account" id="update_payment_account" class="form-control">
+                                    {% for acc in account %}
+                                        <option value="{{ acc.account_name }}">{{ acc.account_name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="inputEmail3" class="col-sm-3 control-label">备注</label>
+                            <div class="col-sm-9">
+                                <input type="text" class="form-control" id="update_remarks" placeholder="备注" name="remarks">
+                                <input type="text" id="update_ids" value="" name="id">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-sm-offset-9 col-sm-10">
+                                <button type="button" class="btn btn-default" onclick="make_sure()">确认修改</button>
+                            </div>
+                        </div>
+                        {% csrf_token %}
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block js %}
+    {#隐藏15行以后的数据以及预留添加行#}
+    <script>
+        $('#0').hide();
+        $('tr#15').nextAll().hide();
+        $('#update_ids').hide();
+    </script>
+    {#查询该旺旺号近期喝酒时间#}
+    <script>
+        $('i#wang_wang_number').on('mouseenter', function () {
+            {#console.log('鼠标进入');#}
+            $('i#wang_wang_number').attr('data-content', '');
+            timer = setTimeout(function () {
+                {#console.log('开始查询');#}
+                var wangwang_num = $('input#wang_wang_number').val();
+                {#console.log(wangwang_num);#}
+                $.ajax({
+                        url: "/erp/search_by_wangwang_num2/",
+                        type: "GET",
+                        dataType: 'json',
+                        data: {'wangwang_num': wangwang_num},
+                        async: true,
+                        success: function (msg) {
+                            {#console.log(msg);#}
+                            {#$('i#wang_wang_number').on('mouseenter', function () {#}
+                            $('i#wang_wang_number').attr('data-content', msg);
+                            $('[data-toggle="popover"]').popover();
+                            $('i#wang_wang_number').popover('show');
+                            {# });#}
+                        },
+                        error: function () {
+                            {#console.log('err');#}
+                            {#$('i#wang_wang_number').on('mouseenter', function () {#}
+                            $('i#wang_wang_number').attr('data-content', '该旺旺号之前没有喝酒');
+                            $('[data-toggle="popover"]').popover();
+                            $('i#wang_wang_number').popover('show');
+                            {# }); #}
+                            {#$('i#wang_wang_number').on('mouseleave', function () {#}
+                            {#console.log('鼠标移走2222');#}
+                            {#$('i#wang_wang_number').popover('hide');#}
+                            {#$('i#wang_wang_number').attr('data-content', '');#}
+                            {# });#}
+                            {#console.log('测试')#}
+                        }
+                    }
+                    {#$('i#wang_wang_number').popover('show');#}
+                )
+            }, 500);
+        });
+        $('i#wang_wang_number').on('mouseleave', function () {
+            {#console.log('鼠标移走');#}
+            clearTimeout(timer);
+            $('i#wang_wang_number').popover('hide');
+            $('i#wang_wang_number').attr('data-content', '');
+        });
+    </script>
+    {#表格里的旺旺号查询#}
+    <script>
+        $('span#search_wangwang2').on('mouseenter', function () {
+            {#console.log('鼠标进入');#}
+            $('span#search_wangwang2').attr('data-content', '');
+            var wangwang_num = $(this).text();
+            var that = $(this);
+            timer = setTimeout(function () {
+                {#console.log('开始查询');#}
+                {#console.log(wangwang_num);#}
+                $.ajax({
+                    url: "/erp/search_by_wangwang_num2/",
+                    type: "GET",
+                    dataType: 'json',
+                    data: {'wangwang_num': wangwang_num},
+                    async: false,
+                    success: function (msg) {
+                        {#console.log(msg);#}
+                        $('span#search_wangwang2').attr('data-content', msg);
+                        $('[data-toggle="popover"]').popover();
+                    },
+                    error: function () {
+                        console.log('err');
+                        $('span#search_wangwang2').attr('data-content', '该旺旺号之前没有喝酒');
+                        $('[data-toggle="popover"]').popover();
+                        {#console.log('测试')#}
+                    }
+                });
+                {#console.log('查询完毕，显示数据');#}
+                that.popover('show')
+            }, 800);
+        });
+        $('span#search_wangwang2').on('mouseleave', function () {
+            {#console.log('鼠标移走');#}
+            clearTimeout(timer);
+            $('span#search_wangwang2').popover('hide');
+            $('span#search_wangwang2').attr('data-content', '');
+        });
+    </script>
+
+    {#创建数据#}
+    <script>
+        function addFunction() {
+            var wang_wang_number = $('#wang_wang_number').val();
+            var online_order_number = $('#online_order_number').val();
+            var payment_amount = $('#payment_amount').val();
+            var pay_type = $('#payment_type').val();
+            var remark = $('#remarks').val();
+
+            if (wang_wang_number != '' && payment_amount != '') {
+                if (pay_type == '买家秀' || pay_type == '其他') {
+                    if (remark == '') {
+                        alert("付款类型为‘买家秀’或‘其他’时，必须填写备注");
+                        return
+                    }
+                }
+                {#if (online_order_number == '' && pay_type != '刮刮卡') {#}
+                {#    alert("付款类型不为刮刮卡，必须填写线上订单号")#}
+                {#    return#}
+                {# } #}
+                $.ajax({
+                    url: "/brushmanagement/",
+                    type: "POST",
+                    dataType: 'json',
+                    data: $('#add_data').serialize(),
+                    async: true,
+                    success: function (arg) {
+                        if (arg['err']) {
+                            alert(arg['err']);
+                            return
+                        }
+                        var idss = arg['id'];
+                        var attri = 'edit_data(' + idss + ',this)';
+                        var attri2 = 'delete_data(' + idss + ',this)';
+                        $('tr#0').children('td#num').html(1);
+                        $('tr#0').children('td#qq_or_weixin').html(arg['qq_or_weixin']);
+                        $('tr#0').children('td#shopname').html(arg['shopname']);
+                        $('tr#0').children('td#wang_wang_number').children('span#search_wangwang2').html(arg['wang_wang_number']);
+                        $('tr#0').children('td#online_order_number').html(arg['online_order_number']);
+                        $('tr#0').children('td#transaction_data').html(arg['transaction_data']);
+                        $('tr#0').children('td#payment_type').html(arg['payment_type']);
+                        $('tr#0').children('td#payment_amount').html(arg['payment_amount']);
+                        $('tr#0').children('td#payment_account').html(arg['payment_account']);
+                        $('tr#0').children('td#remarks').html(arg['remarks']);
+                        $('tr#0').children('td#add_time').html(arg['add_time']);
+                        $('tr#0').children('td').children('a#bsd').attr('onclick', attri);
+                        $('tr#0').children('td').children('a#dele').attr('onclick', attri2);
+                        $('tr#14').attr("id", 15);
+                        $('tr#13').attr("id", 14);
+                        $('tr#12').attr("id", 13);
+                        $('tr#11').attr("id", 12);
+                        $('tr#10').attr("id", 11);
+                        $('tr#9').attr("id", 10);
+                        $('tr#8').attr("id", 9);
+                        $('tr#7').attr("id", 8);
+                        $('tr#6').attr("id", 7);
+                        $('tr#5').attr("id", 6);
+                        $('tr#4').attr("id", 5);
+                        $('tr#3').attr("id", 4);
+                        $('tr#2').attr("id", 3);
+                        $('tr#1').attr("id", 2);
+                        $('tr#0').attr("id", 1);
+                        $('tr#1').before('        <tr id="0">\n' +
+                            '            <td id="add_time"></td>\n' +
+                            '            <td id="shopname"></td>\n' +
+                            '            <td id="qq_or_weixin"></td>\n' +
+                            '            <td id="wang_wang_number"><span data-container="body" data-toggle="popover" data-placement="right" id="search_wangwang2" data-html="true"></span></td>\n' +
+                            '            <td id="online_order_number"></td>\n' +
+                            '            <td id="transaction_data"></td>\n' +
+                            '            <td id="payment_type"></td>\n' +
+                            '            <td id="payment_amount"></td>\n' +
+                            '            <td id="payment_account"></td>\n' +
+                            '            <td id="remarks"></td>\n' +
+                            '            <td><a class="glyphicon glyphicon-pencil" href="javascript:void(0);" onclick="edit_data({{ table.id }},this)" title="编辑" id="bsd"></a>\n' +
+                            '                <a class="glyphicon glyphicon-remove" href="javascript:void(0);" onclick="delete_data({{ table.id }},this)" title="删除" id="dele"></a>\n' +
+                            '            </td>\n' +
+                            '        </tr>');
+                        $('tr#2').children('td#num').html(2);
+                        $('tr#3').children('td#num').html(3);
+                        $('tr#4').children('td#num').html(4);
+                        $('tr#5').children('td#num').html(5);
+                        $('tr#6').children('td#num').html(6);
+                        $('tr#7').children('td#num').html(7);
+                        $('tr#8').children('td#num').html(8);
+                        $('tr#9').children('td#num').html(9);
+                        $('tr#10').children('td#num').html(10);
+                        $('tr#11').children('td#num').html(11);
+                        $('tr#12').children('td#num').html(12);
+                        $('tr#13').children('td#num').html(13);
+                        $('tr#14').children('td#num').html(14);
+                        $('tr#15').children('td#num').html(15);
+                        $('tr#1').show();
+                        $('tr#0').hide();
+                        $('tr#15').nextAll().hide();
+                        $('input#wang_wang_number').val("");
+                        $('input#remarks').val("");
+                        $('input#qq_or_weixin').val("");
+                        $('input#online_order_number').val("");
+                        {#给新增加的行绑定通过旺旺号查询喝酒记录#}
+                        $('span#search_wangwang').hover(function () {
+                                {#$('[data-toggle="popover"]').popover();#}
+                                var wangwang_num = $(this).text();
+                                $.ajax({
+                                    url: "/erp/search_by_wangwang_num/",
+                                    type: "GET",
+                                    dataType: 'json',
+                                    data: {'wangwang_num': wangwang_num},
+                                    async: false,
+                                    success: function (msg) {
+                                        $('span#search_wangwang').attr('data-content', msg);
+                                    },
+                                    error: function () {
+                                        $('span#search_wangwang').attr('data-content', '该旺旺号之前没有喝酒');
+                                    }
+                                });
+                                $(this).popover('show');
+                            }, function () {
+                                $(this).popover('hide');
+                                $('span#search_wangwang').attr('data-content', '');
+                            }
+                        );
+                    },
+
+                })
+            }
+        }
+
+
+    </script>
+    {#修改数据#}
+    <script>
+        function edit_data(mm, sd) {
+            var kj = $(sd).parent().parent().attr('id');
+            $.ajax({
+                url: "/edit/",
+                type: "GET",
+                dataType: 'json',
+                data: {'id': mm, 'num': kj},
+                async: true,
+                success: function (arg) {
+                    $("#update_shopname").find("option").each(function () {
+                        if ($(this).val() == arg['shopname']) {
+                            $(this).attr("selected", "selected");
+                        }
+                    });
+                    $('#update_qq_or_weixin').attr('value', arg['qq_or_weixin']);
+                    $('#update_wang_wang_number').attr('value', arg['wang_wang_number']);
+                    $('#update_online_order_number').attr('value', arg['online_order_number']);
+                    $('#update_transaction_data').attr('value', arg['transaction_data']);
+                    $("#update_payment_type").find("option").each(function () {
+                        if ($(this).val() == arg['payment_type']) {
+                            $(this).attr("selected", "selected");
+                        }
+                    });
+                    $('#update_payment_amount').attr('value', arg['payment_amount']);
+                    $("#update_payment_account").find("option").each(function () {
+                        if ($(this).val() == arg['payment_account']) {
+                            $(this).attr("selected", "selected");
+                        }
+                    });
+                    $('#update_remarks').attr('value', arg['remarks']);
+                    $('#update_ids').attr('value', arg['ids']);
+                    $('#edit_model').modal('show');
+                },
+            })
+        }
+    </script>
+    {#确定修改数据#}
+    <script>
+        function make_sure() {
+            var update_qq_or_weixin = $('#update_qq_or_weixin').val();
+            var update_wang_wang_number = $('#update_wang_wang_number').val();
+            var update_online_order_number = $('#update_online_order_number').val();
+            var update_payment_amount = $('#update_payment_amount').val();
+            var update_payment_type = $('#update_payment_type').val();
+            var update_remarks = $('#update_remarks').val();
+            if (update_wang_wang_number != '' && update_payment_amount != '' && update_qq_or_weixin != '') {
+                if (update_payment_type == '买家秀' || update_payment_type == '其他') {
+                    if (update_remarks == '') {
+                        alert("付款类型为‘买家秀’或‘其他’时，必须填写备注");
+                        return
+                    }
+                }
+                {#if (update_online_order_number == '' && update_payment_type != '刮刮卡') {#}
+                {#    alert("付款类型不为刮刮卡，必须填写线上订单号")#}
+                {#    return#}
+                {# } #}
+                $.ajax({
+                    url: "/edit/",
+                    type: "POST",
+                    dataType: 'json',
+                    data: $('#update_form').serialize(),
+                    async: false,
+                    success: function (msg) {
+                        if (msg == '') {
+                            window.location.replace('/brushmanagement/');
+                        }
+                        else {
+                            alert(msg)
+                        }
+                    }
+                })
+            }
+            else {
+                alert("QQ或微信、旺旺号、付款金额不能为空")
+            }
+        }
+    </script>
+    {#删除数据#}
+    <script>
+        function delete_data(mm, sd) {
+            var kj = $(sd).parent().parent().attr('id');
+            $.ajax({
+                url: "/deletes/",
+                type: "GET",
+                dataType: 'json',
+                data: {'id': mm},
+                async: true,
+                success: function () {
+                    window.location.replace('/brushmanagement/');
+                }
+            });
+            window.location.replace('/brushmanagement/');
+        }
+    </script>
+{% endblock %}

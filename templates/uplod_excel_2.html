@@ -1,0 +1,354 @@
+{% extends 'basc2.html' %}
+{% block head %}
+    <link rel="stylesheet" href="/static/css/upload_excel.css">
+{% endblock %}
+{% block content %}
+    <div class="point"><h4>温馨提示：本页面的数据为临时数据，关闭后则消失。页面上存在问题的数据可以在页面直接修改,然后逐条导入或批量导入</h4></div>
+    <form class="form-inline" action="" method="post" enctype="multipart/form-data">
+        <div class="form-group">
+            <label for="exampleInputName2"><span style="color: red">*</span>&nbsp;&nbsp;&nbsp;上传喝酒数据excel表格:</label>
+            <input type="file" name="excels">
+        </div>
+        <input type="submit" value="上传文件" class="btn btn-default">
+
+        <button type="button" class="btn btn-default col-lg-offset-6" value="批量导入数据" id="upload_data" onclick="submitss()">批量导入数据</button>
+        <a href="/template_file_download/" class="col-lg-offset-1">下载模板文件</a>
+        {% csrf_token %}
+    </form>
+    <hr>
+    <div id="tabless">
+        <table class="table table-striped">
+            <tr>
+                <th>序号</th>
+                <th>店铺</th>
+                <th>QQ或微信</th>
+                <th>旺旺号</th>
+                <th>线上订单号</th>
+                <th>成交日期</th>
+                <th>付款类型</th>
+                <th>付款金额</th>
+                <th>付款账户</th>
+                <th>备注</th>
+                <th>操作</th>
+            </tr>
+            {% for table in tables %}
+                <tr class="rowss" id="{{ forloop.counter }}">
+                    {# <tr id="{{ forloop.counter }}">#}
+                    <td id="row_num">{{ forloop.counter }}</td>
+                    <td contenteditable="true" id="shopname">{{ table.shopname }} </td>
+                    <td contenteditable="true" id="qq_or_weixin">{{ table.qq_or_weixin }}</td>
+                    <td contenteditable="true" id="wang_wang_number">{{ table.wang_wang_number }}</td>
+                    <td contenteditable="true" id="online_order_number">{{ table.online_order_number }}</td>
+                    <td contenteditable="true" id="transaction_date">{{ table.transaction_date }}</td>
+                    <td contenteditable="true" id="payment_type">{{ table.payment_type }}</td>
+                    <td contenteditable="true" id="payment_amount">{{ table.payment_amount }}</td>
+                    <td contenteditable="true" id="payment_account">{{ table.payment_account }}</td>
+                    <td contenteditable="true" id="remarks">{{ table.remarks }}</td>
+                    <td><a class="glyphicon glyphicon-arrow-up" href="javascript:void(0);" title="导入数据" id="single_up" onclick="single_up(this)"></a>
+                        <a class="glyphicon glyphicon-remove" href="javascript:void(0);" title="删除" id="dele" onclick="dele(this)"></a>
+                    </td>
+                </tr>
+            {% endfor %}
+        </table>
+    </div>
+    <div id="errs_head">
+        {#        <h3>上传数据的数据存在的问题</h3>#}
+        <h3>操作记录：</h3>
+    </div>
+    <div id="errs2_head">
+        <h3>淘客旺旺号：</h3>
+    </div>
+    <div id="errs">
+        {#        {{ msg.tips |safe }}#}
+    </div>
+
+    <div id="errs2">
+
+    </div>
+    {#    提示信息的模态框#}
+    <div class="modal fade" tabindex="-1" role="dialog" id="upload_message_modal">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">提示</h4>
+                </div>
+                <div class="modal-body">
+                    <div id="upload_message_modal_head">
+
+                    </div>
+
+                    <div id="upload_message_modal_body">
+
+                    </div>
+                    <div id="upload_message_modal_body_2">
+
+                    </div>
+
+                    <div id="upload_message_modal_footer">
+
+                    </div>
+                </div>
+                <br>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                    {#<button type="button" class="btn btn-primary">Save changes</button>#}
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+    {#{% csrf_token %}#}
+{% endblock %}
+{% block js %}
+    {#    添加操作日志#}
+    <script>
+        function add_log(log_head, log_msg) {
+            $('div#errs').append('<b>' + log_head + '</b>-----------------------------------------');
+            $('div#errs').append('</br>' + log_msg + '</br></br>');
+            {#操作日志滚动条保持底部#}
+            var showContent = $("div#errs");
+            showContent[0].scrollTop = showContent[0].scrollHeight;
+        }
+    </script>
+
+    {#文件格式问题提示#}
+    <script>
+        if ('{{ msg.error }}' != '') {
+            alert('{{ msg.error|safe }}')
+        }
+    </script>
+    {#调用模态框提示信息#}
+    <script>
+        function model_messages(msg_) {
+            $('#upload_message_modal_head').empty();
+            $('#upload_message_modal_footer').empty();
+            $('#upload_message_modal_body').empty();
+            $('#upload_message_modal_body_2').empty();
+            $('#upload_message_modal_body').css('height', '0px');
+            $('#upload_message_modal_body_2').append(msg_);
+            $('#upload_message_modal').modal('show');
+        }
+
+        function model_messages_2(flog_head = '', msg_, flog_footer = '') {
+            $('#upload_message_modal_head').empty();
+            $('#upload_message_modal_footer').empty();
+            $('#upload_message_modal_body').empty();
+            $('#upload_message_modal_body_2').empty();
+            $('#upload_message_modal_body_2').css('height', '0px');
+            $('#upload_message_modal_head').append(flog_head);
+            $('#upload_message_modal_body').append(msg_);
+            $('#upload_message_modal_footer').append(flog_footer);
+            if (flog_head == '') {
+                $('#upload_message_modal_head').css('height', '0px');
+            }
+            if (flog_footer == '') {
+                $('#upload_message_modal_footer').css('height', '0px');
+            }
+            $('#upload_message_modal').modal('show');
+        }
+    </script>
+    {#批量导入数据#}
+    <script>
+        function submitss() {
+            var success_num = 0;
+            var error_num = 0;
+            var uplodes_errs = '';
+            $('#upload_data').attr('disabled', 'true');
+            $('tr.rowss').each(
+                function () {
+                    var row_num = $(this).children('td#row_num').text();
+                    var shopname = $(this).children('td#shopname').text();
+                    var qq_or_weixin = $(this).children('td#qq_or_weixin').text();
+                    var wang_wang_number = $(this).children('td#wang_wang_number').text();
+                    var online_order_number = $(this).children('td#online_order_number').text();
+                    var transaction_date = $(this).children('td#transaction_date').text();
+                    var payment_type = $(this).children('td#payment_type').text();
+                    var payment_amount = $(this).children('td#payment_amount').text();
+                    var payment_account = $(this).children('td#payment_account').text();
+                    var remarks = $(this).children('td#remarks').text();
+                    var datas = {
+                        csrfmiddlewaretoken: '{{ csrf_token }}',
+                        'row_num': row_num,
+                        'shopname': shopname,
+                        'qq_or_weixin': qq_or_weixin,
+                        'wang_wang_number': wang_wang_number,
+                        'online_order_number': online_order_number,
+                        'transaction_date': transaction_date,
+                        'payment_type': payment_type,
+                        'payment_amount': payment_amount,
+                        'payment_account': payment_account,
+                        'remarks': remarks,
+                    };
+                    if (wang_wang_number != '' && payment_amount != '' && shopname != '' && qq_or_weixin != '' && transaction_date != '' && payment_type != '' && payment_amount != '' && payment_account != '') {
+                        if (payment_type == '买家秀' || payment_type == '其他') {
+                            if (remarks == '') {
+                                uplodes_errs = uplodes_errs + '第' + row_num + '行错误原因：付款类型为‘买家秀’或‘其他’时，必须填写备注<br>';
+                                error_num++;
+                                return
+                            }
+                        }
+                    } else {
+                        uplodes_errs = uplodes_errs + '第' + row_num + '行错误原因：除了线上订单号和备注（付款类型为‘买家秀’或‘其他’时，必须填写备注）可以为空外，其余均必填<br>';
+                        error_num++;
+                        return
+                    }
+                    var this_ = this;
+                    $.ajax({
+                        url: "/upload_data/",
+                        type: "POST",
+                        dataType: 'json',
+                        data: datas,
+                        async: false,
+                        success: function (msg) {
+                            {#$('div#errs2').append(msg['data_err_row']);#}
+                            if (msg['data_err_row'] == '') {
+                                success_num++;
+                                $(this_).remove()
+                            } else {
+                                uplodes_errs = uplodes_errs + msg['data_err_row'];
+                                error_num++;
+                            }
+                            if (msg['taobao_buyer'] != '') {
+                                $('div#errs2').append(msg['taobao_buyer'] + '、');
+                            }
+                        }
+                    })
+                }
+            )
+            var msg_ = '本次上传成功' + success_num + '条数据，失败' + error_num + '条<br>';
+            var log_err = msg_ + uplodes_errs;
+            if (error_num == 0) {
+                log_err = msg_ + '全部上传成功'
+            }
+            model_messages_2(msg_, uplodes_errs, '请修改后再导入');
+            var log_head = '批量导入数据';
+            add_log(log_head, log_err);
+            $('#upload_data').removeAttr("disabled");
+            console.log('remove');
+            {#alert('本次上传成功' + success_num + '条数据，失败' + error_num + '条')#}
+        }
+    </script>
+    {#上传文件成功提示#}
+    <script>
+        var flog = '{{ flog }}';
+        if (flog == 1) {
+            var flog_heads = '页面显示的数据为临时数据，没有上传。离开该页面数据将消失';
+            var flog_footers = '<br>如果批量导入，请点击“批量导入数据”按钮<br>如果单条导入，请点击对应的<i class="glyphicon glyphicon-arrow-up" style="color: #337ab7"> </i><br>如果删除单条数据请点击对应的 <i class="glyphicon glyphicon-remove" style="color: #337ab7"></i>';
+            var flog_msg = '{{ msg.tips |safe }}';
+            model_messages_2(flog_head = flog_heads, flog_msg, flog_footer = flog_footers);
+            var log_head = '上传文件';
+            add_log(log_head, flog_msg);
+        }
+    </script>
+
+    {#单条数据导入#}
+    <script>
+        function single_up(obj) {
+            var row_num = $(obj).parent().parent().find('td#row_num').text();
+            var shopname = $(obj).parent().parent().find('td#shopname').text();
+            var qq_or_weixin = $(obj).parent().parent().find('td#qq_or_weixin').text();
+            var wang_wang_number = $(obj).parent().parent().find('td#wang_wang_number').text();
+            var online_order_number = $(obj).parent().parent().find('td#online_order_number').text();
+            var transaction_date = $(obj).parent().parent().find('td#transaction_date').text();
+            var payment_type = $(obj).parent().parent().find('td#payment_type').text();
+            var payment_amount = $(obj).parent().parent().find('td#payment_amount').text();
+            var payment_account = $(obj).parent().parent().find('td#payment_account').text();
+            var remarks = $(obj).parent().parent().find('td#remarks').text();
+            var datas = {
+                csrfmiddlewaretoken: '{{ csrf_token }}',
+                'row_num': row_num,
+                'shopname': shopname,
+                'qq_or_weixin': qq_or_weixin,
+                'wang_wang_number': wang_wang_number,
+                'online_order_number': online_order_number,
+                'transaction_date': transaction_date,
+                'payment_type': payment_type,
+                'payment_amount': payment_amount,
+                'payment_account': payment_account,
+                'remarks': remarks,
+            };
+            var this_ = $(obj).parent().parent()
+            if (wang_wang_number != '' && payment_amount != '' && shopname != '' && qq_or_weixin != '' && transaction_date != '' && payment_type != '' && payment_amount != '' && payment_account != '') {
+                if (payment_type == '买家秀' || payment_type == '其他') {
+                    if (remarks == '') {
+                        var msg_err = '付款类型为‘买家秀’或‘其他’时，必须填写备注';
+                        alert(msg_err);
+                        return
+                    }
+                }
+            } else {
+                var msg_err_1 = '除了线上订单号和备注（付款类型为‘买家秀’或‘其他’时，必须填写备注）可以为空外，其余均必填';
+                alert(msg_err_1);
+                return
+            }
+            $.ajax({
+                url: "/upload_data/",
+                type: "POST",
+                dataType: 'json',
+                data: datas,
+                async: false,
+                success: function (msg) {
+                    if (msg['data_err'] == '') {
+                        $(this_).remove();
+                        var success_mag = '第' + row_num + '行数据上传成功';
+                        model_messages(success_mag);
+                        var log_head = '单条数据导入';
+                        add_log(log_head, success_mag);
+                    } else {
+                        var err_mag = '第' + row_num + '行数据上传失败，失败原因：' + msg['data_err'] + '</br>';
+                        model_messages(err_mag);
+                        var log_head = '单条数据导入';
+                        add_log(log_head, err_mag);
+                    }
+                    if (msg['taobao_buyer'] != '') {
+                        $('div#errs2').append(msg['taobao_buyer'] + '、');
+                    }
+                }
+            })
+        }
+    </script>
+    {#删除数据#}
+    <script>
+        function dele(obj) {
+            var this_ = $(obj).parent().parent();
+            var row_num = $(obj).parent().parent().find('td#row_num').text();
+            $(this_).remove();
+            var log_head = '删除数据';
+            var log_msg = '删除了第' + row_num + '行数据<br>'
+            model_messages(log_msg);
+            add_log(log_head, log_msg);
+        }
+    </script>
+    {#修改数据创造日志#}
+    <script>
+        function edit_table_massage(obj) {
+            var before_texts = $(obj).text();
+            var ids = $(obj).attr('id');
+            var row_num = $(obj).parent().find('td#row_num').text();
+            var edit_head = '';
+            switch (ids) {
+                case 'shopname':
+                    edit_head = '店铺名';
+                case 'qq_or_weixin':
+                    edit_head = 'QQ或微信';
+                case 'wang_wang_number':
+                    edit_head = '旺旺号';
+                case 'online_order_number':
+                    edit_head = '线上订单号';
+                case 'transaction_date':
+                    edit_head = '成交日期';
+                case 'payment_type':
+                    edit_head = '付款类型';
+                case 'payment_amount':
+                    edit_head = '付款金额';
+                case 'payment_account':
+                    edit_head = '付款账户';
+                case 'remarks':
+                    edit_head = '备注';
+            }
+            var log_head = '修改了第' + row_num + '的' + edit_head + '数据';
+            var log_msg = '原先的数据为：' + before_texts;
+            add_log(log_head, log_msg);
+        }
+    </script>
+{% endblock %}

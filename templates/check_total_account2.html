@@ -1,0 +1,271 @@
+{% extends 'basc2.html' %}
+{% block head %}
+    <link rel="stylesheet" href="/static/css/check_account.css">
+{% endblock %}
+{% block content %}
+    <h2>总账户核对</h2>
+    <hr>
+    <form class="form-inline" id="check_data" method="post">
+        <div class="form-group">
+            <label for="exampleInputName2">日期:</label>
+            <input type="date" class="form-control" value="{{ now_time }}" name="check_date">
+        </div>
+        <div class="form-group">
+            <label for="exampleInputName2">总账户名:</label>
+            <select name="search_total_account_name" id="payment_account" class="form-control">
+                {% for acc in total_account_all %}
+                    <option value="{{ acc.total_account_name }}">{{ acc.total_account_name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <input type="submit" value="核对" class="btn btn-default">
+        {% csrf_token %}
+    </form>
+    <br>
+    <hr>
+    {#    显示数据#}
+    <div id="tabless">
+        <table class="table table-striped">
+            <tr>
+                <th>序号</th>
+                <th>日期</th>
+                <th>账户名</th>
+                <th>初始资金</th>
+                <th>结余资金</th>
+                <th>微信提现费用</th>
+                <th>初始资金截图</th>
+                <th>结余资金截图</th>
+                <th>微信提现费用截图</th>
+                <th>操作人</th>
+                <th>子账户状态</th>
+                <th>操作</th>
+            </tr>
+            {% for table in tables %}
+                <tr id="{{ forloop.counter }}">
+                    <td id="num">{{ forloop.counter }}</td>
+                    <td>{{ table.datess }}</td>
+                    <td>{{ table.account_name.account_name }}</td>
+                    <td>{{ table.start_money }}</td>
+                    <td>{{ table.end_money }}</td>
+                    <td>{{ table.weixin_withdraw_money }}</td>
+                    {% if  table.start_money_img %}
+                        <td><a href="/media/{{ table.start_money_img }}" target="view_window"><img src="/media/{{ table.start_money_img }}" alt="" id="smar_img"></a></td>
+                    {% else %}
+                        <td></td>
+                    {% endif %}
+                    {% if  table.end_money_img %}
+                        <td><a href="/media/{{ table.end_money_img }}" target="view_window"><img src="/media/{{ table.end_money_img }}" alt="" id="smar_img"></a></td>
+                    {% else %}
+                        <td></td>
+                    {% endif %}
+                    {% if  table.weixin_img %}
+                        <td><a href="/media/{{ table.weixin_img }}" target="view_window"><img src="/media/{{ table.weixin_img }}" alt="" id="smar_img"></a></td>
+                    {% else %}
+                        <td></td>
+                    {% endif %}
+                    <td>{{ table.operator.username }}</td>
+                    {% if table.makes == 'False' %}
+                        <td><span class="glyphicon glyphicon-remove" style="color: red"></span></td>
+                    {% else %}
+                        <td><span class="glyphicon glyphicon-ok" style="color: green"></span></td>
+                    {% endif %}
+                    {% if table.operator.username == user %}
+                        <td><a class="glyphicon glyphicon-pencil" href="javascript:void(0);" onclick="edit_data({{ table.id }},this)" title="编辑"
+                               id="bsd"></a>
+                            <a class="glyphicon glyphicon-remove" href="javascript:void(0);" onclick="delete_data({{ table.id }},this)" title="删除"
+                               id="dele"></a>
+                        </td>
+                    {% else %}
+                        <td></td>
+                    {% endif %}
+                </tr>
+            {% endfor %}
+        </table>
+    </div>
+    {#修改数据的模态框#}
+    {#    <div class="modal fade" tabindex="-1" role="dialog" aria-labelledby="gridSystemModalLabel" id="edit_model">#}
+    <div class="modal fade" tabindex="-1" role="dialog" id="edit_model">
+
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="gridSystemModalLabel">修改账户记录</h4>
+                </div>
+                <div class="modal-body">
+                    <form class="form-horizontal" id="update_form" ENCTYPE="multipart/form-data" method="post" action="/edit_count_2/">
+                        <div class="form-group">
+                            <label for="inputEmail3" class="col-sm-3 control-label"><span style="color: red">*</span>&nbsp;&nbsp;&nbsp;账户名</label>
+                            <div class="col-sm-9">
+                                <input class="form-control" id="eidt_account_name" type="text" disabled>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="exampleInputName2" class="col-sm-3 control-label"><span
+                                    style="color: red">*</span>&nbsp;&nbsp;&nbsp;初始资金</label>
+                            <div class="col-sm-9">
+                                {{ edit_form.start_money }}
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="exampleInputName2" class="col-sm-3 control-label"><span
+                                    style="color: red">*</span>&nbsp;&nbsp;&nbsp;结余资金</label>
+                            <div class="col-sm-9">
+                                {{ edit_form.end_money }}
+                            </div>
+                            <input type="text" id="update_ids" value="" name="id">
+                        </div>
+                        <div class="form-group">
+                            <label for="exampleInputName2" class="col-sm-3 control-label"><span
+                                    style="color: red">*</span>&nbsp;&nbsp;&nbsp;微信提现费用</label>
+                            <div class="col-sm-9">
+                                {{ edit_form.weixin_withdraw_money }}
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="exampleInputName2" class="col-sm-3 control-label"><span
+                                    style="color: red">*</span>&nbsp;&nbsp;&nbsp;初始资金截图</label>
+                            <input type="file" id="eidt_start_money_img" name="start_money_img">
+                        </div>
+                        <div class="form-group">
+                            <label for="exampleInputName2" class="col-sm-3 control-label"><span
+                                    style="color: red">*</span>&nbsp;&nbsp;&nbsp;结余资金截图</label>
+                            <input type="file" id="eidt_end_money_img" name="end_money_img">
+                        </div>
+                        <div class="form-group">
+                            <label for="exampleInputName2" class="col-sm-3 control-label"><span
+                                    style="color: red">*</span>&nbsp;&nbsp;&nbsp;微信提现费用截图</label>
+                            <input type="file" id="eidt_weixin_img" name="weixin_img">
+                        </div>
+                        <div class="form-group">
+                            <div class="col-sm-offset-9 col-sm-10">
+                                <button type="submit" class="btn btn-default">确认修改</button>
+                            </div>
+                        </div>
+                        {% csrf_token %}
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <h3 class="col-lg-offset-8">总账户差额：<span id="actual">{{ total_cost }}</span></h3>
+    <h3 class="col-lg-offset-8">子账户总花销：<span id="pay">{{ account_cost }}</span></h3>
+    <h3 class="col-lg-offset-8">喝酒总花销：<span id="child_account_cost_all">{{ child_account_cost_all }}</span></h3>
+
+    <input type="button" onclick="make()" value="核对确认" class="btn btn-info col-lg-offset-9" id="make"><h3 id="add" class="col-lg-offset-8"
+                                                                                                          style="color: red"></h3>
+
+{% endblock %}
+{% block js %}
+    {#总账户选框默认选中#}
+    <script>
+        $("#payment_account").find("option").each(function () {
+            var ff = '{{ total_account_select }}';
+            if ($(this).val() == ff) {
+                $(this).attr("selected", "selected");
+            }
+        });
+    </script>
+    <script>
+        var errs = '{{ err }}';
+        if (errs != '') {
+            $('#make').hide();
+            $('#add').append(errs)
+        }
+        else {
+            $('#make').show();
+        }
+    </script>
+    <script>
+        $('#update_ids').hide();
+        if ('{{ unmake_stats }}' == 0) {
+            $('#make').attr("value", "已确认");
+            $('#make').prop("disabled", true);
+        }
+        else {
+            $('#make').attr("value", "核对确认");
+            $('#make').prop("disabled", false);
+        }
+    </script>
+    <script>
+        $("#payment_account").find("option").each(function () {
+            var ff = '{{ payment_account }}';
+            if ($(this).val() == ff) {
+                $(this).attr("selected", "selected");
+            }
+        });
+    </script>
+    <script>
+        function make() {
+            $.ajax({
+                url: "/make_total_account/",
+                type: "GET",
+                dataType: 'json',
+                data: $('#check_data').serialize(),
+                async: true,
+                success: function (arg) {
+                    $('#make').attr("value", "已确认");
+                    $('#make').prop("disabled", true);
+                    window.location.replace('/check_total_account/');
+                }
+            })
+        }
+    </script>
+    {#修改数据#}
+    <script>
+        function edit_data(mm, sd) {
+            $.ajax({
+                url: "/edit_count/",
+                type: "GET",
+                dataType: 'json',
+                data: {'id': mm},
+                async: true,
+                success: function (arg) {
+                    $('#eidt_start_money').attr('value', arg['start_money']);
+                    $('#eidt_account_name').attr('value', arg['account_name']);
+                    $('#eidt_end_money').attr('value', arg['end_money']);
+                    $('#eidt_start_money_img').attr('value', arg['start_money_img']);
+                    $('#eidt_end_money_img').attr('value', arg['end_money_img']);
+                    $('#update_ids').attr('value', arg['ids']);
+                    $('#eidt_weixin_withdraw_money').attr('value', arg['weixin_withdraw_money']);
+                    $('#edit_model').modal('show');
+                }
+            })
+        }
+    </script>
+
+    {#确定修改数据#}
+    <script>
+        function make_sure() {
+            $.ajax({
+                url: "/edit_count/",
+                type: "POST",
+                dataType: 'json',
+                data: $('#update_form').serialize(),
+                async: false,
+                success: function () {
+                    window.location.replace('/check_total_account/');
+                }
+            })
+            window.location.replace('/check_total_account/');
+        }
+    </script>
+    {#删除数据#}
+    <script>
+        function delete_data(mm, sd) {
+            $.ajax({
+                url: "/deletes_count/",
+                type: "GET",
+                dataType: 'json',
+                data: {'id': mm},
+                async: false,
+                success: function () {
+                    console.log('OK')
+                }
+            });
+            window.location.replace("/check_total_account/")
+        }
+    </script>
+
+
+{% endblock %}

@@ -1,0 +1,76 @@
+{% extends 'basc.html' %}
+{% block head %}
+    <link rel="stylesheet" href="/static/css/check_account.css">
+{% endblock %}
+{% block content %}
+    <h2>子账户账单</h2>
+    <hr>
+    <form class="form-inline" id="check_data" method="post">
+        <div class="form-group">
+            <label for="exampleInputName2">日期:</label>
+            <input type="date" class="form-control" value="{{ now_time }}" name="check_data">
+        </div>
+        <div class="form-group">
+            <label for="exampleInputName2">账户名:</label>
+            <select name="account_name" id="account_name" class="form-control">
+                {% for acc in account %}
+                    <option value="{{ acc.account_name }}">{{ acc.account_name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <input type="submit" value="查询" class="btn btn-default">
+        {% csrf_token %}
+    </form>
+    <div id="tabless">
+        <table class="table table-striped">
+            <tr>
+                <th>序号</th>
+                <th>店铺</th>
+                <th>QQ或微信</th>
+                <th>旺旺号</th>
+                <th>线上订单号</th>
+                <th>成交日期</th>
+                <th>付款类型</th>
+                <th>付款金额</th>
+                <th>付款账户</th>
+                <th>备注</th>
+                <th>创建时间</th>
+                <th>操作人</th>
+            </tr>
+            {% for table in tables %}
+                <tr id="{{ forloop.counter }}">
+                    <td id="num">{{ forloop.counter }}</td>
+                    <td>{{ table.shopname }}</td>
+                    <td>{{ table.qq_or_weixin }}</td>
+                    <td>{{ table.wang_wang_number }}</td>
+                    <td>{{ table.online_order_number }}</td>
+                    <td>{{ table.transaction_data }}</td>
+                    <td>{{ table.payment_type }}</td>
+                    <td>{{ table.payment_amount }}</td>
+                    <td>{{ table.payment_account.account_name }}</td>
+                    <td>{{ table.remarks }}</td>
+                    <td>{{ table.add_time }}</td>
+                    <td>{{ table.operator.username }}</td>
+                </tr>
+            {% endfor %}
+        </table>
+    </div>
+    <h3 class="col-lg-offset-8">喝酒花销：<span id="pay">{{ pay_money }}</span></h3>
+    <h3 class="col-lg-offset-8">账户差额：<span id="actual">{{ actual_cost }}</span></h3>
+    {% if count_stats == '该账户未确认' %}
+        <h3 class="col-lg-offset-8">账户状态：<span id="actual" style="color: red">{{ count_stats }}</span></h3>
+    {% else %}
+        <h3 class="col-lg-offset-8">账户状态：<span id="actual">{{ count_stats }}</span></h3>
+    {% endif %}
+{% endblock %}
+
+{% block js %}
+    <script>
+        $("#account_name").find("option").each(function () {
+            var ff = '{{ account_name }}';
+            if ($(this).val() == ff) {
+                $(this).attr("selected", "selected");
+            }
+        });
+    </script>
+{% endblock %}

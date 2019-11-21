@@ -1,0 +1,165 @@
+{% extends 'basc.html' %}
+{% block head %}
+    <link rel="stylesheet" href="/static/css/all_data.css">
+
+{% endblock %}
+{% block content %}
+    <h2>总账单</h2>
+    <hr>
+    <form class="form-inline" id="check_data" method="post">
+        <div class="form-group">
+            <label for="exampleInputName2">日期:</label>
+            <input type="date" class="form-control" value="{{ now_time }}" name="search_date" id="search_date" onchange="cheage_down()">
+        </div>
+        <div class="form-group">
+            <label for="exampleInputName2">总账户:</label>
+            <select name="total_account" id="total_account" class="form-control" onchange="cheage_down()">
+                {% for total_account in total_account_all %}
+                    <option value="{{ total_account.total_account_name }}">{{ total_account.total_account_name }}</option>
+                {% endfor %}
+                <option value="all">全部</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="exampleInputName2">付款类型:</label>
+            <select name="payment_type" id="payment_type" class="form-control" onchange="cheage_down()">
+                {% for pay_type in pay_types %}
+                    <option value="{{ pay_type.types }}">{{ pay_type.types }}</option>
+                {% endfor %}
+                <option value="全部">全部</option>
+            </select>
+        </div>
+        <input type="submit" value="查询" class="btn btn-default">
+        <a href="" id="down"><input type="button" value="按日下载" class="btn btn-default"></a>
+        <a href="" id="down2"><input type="button" value="按月下载" class="btn btn-default"></a>
+        <input type="button" value="订单状态" class="btn btn-default col-lg-offset-2" id="show_stats">
+        {% csrf_token %}
+    </form>
+    {#    显示数据#}
+    <div id="tabless">
+        <button class="col-lg-offset-9"></button>
+        <table class="table table-striped">
+            <tr id="table_head">
+                <th>状态</th>
+                <th>序号</th>
+                <th>店铺</th>
+                <th>旺旺号</th>
+                <th>线上订单号</th>
+                <th>成交日期</th>
+                <th>付款类型</th>
+                <th>付款金额</th>
+                <th>付款账户</th>
+                <th>备注</th>
+                <th>创建时间</th>
+                <th>操作人</th>
+            </tr>
+            {% for table in tables %}
+                <tr id="{{ forloop.counter }}">
+                    <td id="stats"></td>
+                    <td id="num">{{ forloop.counter }}</td>
+                    <td id="shopname">{{ table.shopname }}</td>
+                    <td id="wang_wang_number">{{ table.wang_wang_number }}</td>
+                    <td id="online_order_number">{{ table.online_order_number }}</td>
+                    <td id="transaction_data">{{ table.transaction_data }}</td>
+                    <td id="payment_type">{{ table.payment_type }}</td>
+                    <td id="payment_amount">{{ table.payment_amount }}</td>
+                    <td id="payment_account">{{ table.payment_account.account_name }}</td>
+                    <td id="remarks">{{ table.remarks }}</td>
+                    <td id="add_time">{{ table.add_time }}</td>
+                    <td id="operator">{{ table.operator.username }}</td>
+                </tr>
+            {% endfor %}
+        </table>
+    </div>
+    <h3 class="col-lg-offset-10">{{ payment_type }}花销：<span id="pay">{{ pay_money }}</span>
+    </h3>
+{% endblock %}
+{% block js %}
+    {# 查看滚轴高度 #}
+    <script>
+        var wh = $('#tabless').height();
+    </script>
+    {#下载#}
+    <script>
+        var search_date = $('#search_date').val();
+        var payment_type = $("#payment_type").find("option:selected").text();
+        var payment_total_account = $('select#total_account').find("option:selected").text();
+        var down_url = '/down_all_data/?check_data=' + search_date + '&payment_type=' + payment_type + '&payment_total_account=' + payment_total_account;
+        var down_url2 = '/down_all_data2/?check_data=' + search_date + '&payment_type=' + payment_type + '&payment_total_account=' + payment_total_account;
+        $('#down').attr('href', down_url);
+        $('#down2').attr('href', down_url2);
+
+        function cheage_down() {
+            var search_date = $('#search_date').val();
+            var payment_type = $('#payment_type').find("option:selected").text();
+            var payment_total_account = $('select#total_account').find("option:selected").text();
+            var down_url = '/down_all_data/?check_data=' + search_date + '&payment_type=' + payment_type + '&payment_total_account=' + payment_total_account;
+            var down_url2 = '/down_all_data2/?check_data=' + search_date + '&payment_type=' + payment_type + '&payment_total_account=' + payment_total_account;
+            $('#down').attr('href', down_url);
+            $('#down2').attr('href', down_url2);
+        }
+    </script>
+    {#默认显示付款类型#}
+    <script>
+        $("#payment_type").find("option").each(function () {
+            var ff = '{{ payment_type }}';
+            if ($(this).val() == ff) {
+                $(this).attr("selected", true);
+            }
+        });
+    </script>
+    {#默认显示总账户#}
+    <script>
+        $("#total_account").find("option").each(function () {
+            var ff = '{{ total_account }}';
+            if ($(this).val() == ff) {
+                $(this).attr("selected", true);
+            }
+        });
+    </script>
+    {#查询喝酒记录状态#}
+    <script>
+        $('#show_stats').click(function () {
+                $('tr#table_head').nextAll("tr").each(
+                    function () {
+                        var num = $(this).children('#num').text();
+                        var payment_type = $(this).children('#payment_type').text();
+                        var online_order_number = $(this).children('#online_order_number').text();
+                        var datas = {
+                            csrfmiddlewaretoken: '{{ csrf_token }}',
+                            'online_order_number': online_order_number,
+                        };
+                        var this_ = $(this);
+                        if (online_order_number != '') {
+                            $.ajax({
+                                url: "/erp/search_by_online_order_number/",
+                                type: "POST",
+                                dataType: 'json',
+                                data: datas,
+                                async: true,
+                                success: function (msg) {
+                                    if (msg == 1) {
+                                        $('[data-toggle="popover"]').popover();
+                                        $(this_).children('#stats').append('<i class="fa fa-warning" id="online_stats_unexist" data-container="body" data-toggle="popover" data-placement="right" data-content="线上订单号可能错误，请仔细核对" style="color: red;"></i>');
+                                    }
+                                    else if (msg == 2 && payment_type == '本金') {
+                                        $('[data-toggle="popover"]').popover()
+                                        $(this_).children('#stats').append('<i class="fa fa-warning" id="order_special_unexist" data-container="body" data-toggle="popover" data-placement="right"data-content="该订单可能为实包" style="color: blue;"></i>')
+                                    }
+                                    else {
+                                        $('[data-toggle="popover"]').popover()
+                                        $(this_).children('#stats').append('<i class="fa fa-circle" aria-hidden="true"  id="normals" data-container="body" data-toggle="popover" data-placement="right"data-content="该记录正常 " data-trigger="hover"   style="color: green;"></i>')
+                                    }
+                                }
+                            })
+                        }
+                    }
+                )
+                $(this).attr('disabled', 'true')
+            }
+        )
+    </script>
+    <script>
+        $('[data-toggle="popover"]').popover()
+    </script>
+{% endblock %}

@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ title }}</title>
+    <script src="/static/js/jquery-3.3.1.min.js"></script>
+    <script src="/static/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="/static/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/static/font-awesome-4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="/static/css/basc2.css">
+    <link rel="stylesheet" href="/static/css/brush_stats.css">
+    {#    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">#}
+    {% block head %}
+
+    {% endblock %}
+</head>
+<body>
+<div id="nav">
+    <div id="logo"><span class="left_nav">宝儿喝酒数据管理系统</span> <span class="right_nav" style="font-size: 1.8rem"><span id="light"></span>&nbsp;&nbsp;&nbsp;欢迎，
+        <span class="dropdown">
+        <a href="javascript:void(0); " id="nav_user" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">{{ user }}</a>
+        <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
+            <li><a href=" /" style="font-size:small ">退出</a></li>
+            <li onclick="update_passwd()" data-toggle="#update_passwd_modal"><a href="javascript:void(0);" style="font-size:small "
+                                                                                id="update_passwd">修改密码</a></li>
+        </ul>
+        </span>   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></div>
+</div>
+{#左侧导航#}
+<div id="left_nav">
+    <a href="javascript:void(0);" onclick="menu1()">
+        <div class="menu">
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="glyphicon glyphicon-align-left" aria-hidden="true"></span>&nbsp;&nbsp;&nbsp;日常数据管理
+        </div>
+        <hr id="nav_hr">
+    </a>
+    <div class="menuss">
+
+        <a href="/total_countmanagement/">
+            <div class="menus">总账户转账数据录入</div>
+        </a>
+        <a href="/countmanagement/">
+            <div class="menus">子账户转账数据录入</div>
+        </a>
+        <a href="/brushmanagement/">
+            <div class="menus">每日喝酒数据录入</div>
+        </a>
+        <a href="/Upload_excel/">
+            <div class="menus">喝酒数据上传</div>
+        </a>
+        <a href="/upload_excel_2/">
+            <div class="menus">销售部数据上传</div>
+        </a>
+    </div>
+    <a href="javascript:void(0);" onclick="menu2()">
+        <div class="menu">
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="glyphicon glyphicon-align-left" aria-hidden="true"></span>&nbsp;&nbsp;&nbsp;账单核对
+        </div>
+        <hr id="nav_hr">
+    </a>
+    <div class="menuss2">
+        <a href="/check_account/">
+            <div class="menus">子账户核对 <span id="remind">{{ reminds }}</span></div>
+        </a>
+        <a href="/check_total_account/">
+            <div class="menus">总账户核对 <span id="remind">{{ total_reminds }}</span></div>
+        </a>
+    </div>
+    <a href="javascript:void(0);" onclick="menu2()">
+        <div class="menu">
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="glyphicon glyphicon-align-left" aria-hidden="true"></span>&nbsp;&nbsp;&nbsp;数据查询及下载
+        </div>
+        <hr id="nav_hr">
+    </a>
+    <div class="menuss2">
+        <a href="/more_date/">
+            <div class="menus">喝酒数据查询</div>
+        </a>
+        <a href="/delete_data_by_account_today_view/">
+            <div class="menus">喝酒数据删除</div>
+        </a>
+    </div>
+    <a href="javascript:void(0);" onclick="menu2()">
+        <div class="menu">
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="glyphicon glyphicon-align-left" aria-hidden="true"></span>&nbsp;&nbsp;&nbsp;淘客管理
+        </div>
+        <hr id="nav_hr">
+    </a>
+    <div class="menuss2">
+        <a href="{% url 'search_taobao_buyer_information' %}">
+            <div class="menus">淘客信息查询 <span id="remind"></span></div>
+        </a>
+        <a href="{% url 'taobao_buyer_entry' %}">
+            <div class="menus">淘客信息录入 <span id="remind"></span></div>
+        </a>
+    </div>
+</div>
+<div id="content">
+    <div id="cont">
+        {#右侧内容区#}
+        {% block content %}
+
+        {% endblock %}
+    </div>
+</div>
+<footer style="text-align: center;color: white">
+    当前系统版本号：V 1.2.43
+</footer>
+{#修改密码#}
+<div class="modal fade" id="update_passwd_modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="myModalLabel">修改密码</h4>
+            </div>
+            <div class="modal-body">
+                <form class="form-horizontal" id="update_passwd_form" method="post" action="/update_passwd/">
+                    <div class="form-group">
+                        <label for="inputEmail3" class="col-sm-3 control-label">新密码</label>
+                        <div class="col-sm-9">
+                            {{ update_passwd.passwd }}
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="inputEmail3" class="col-sm-3 control-label">确认密码</label>
+                        <div class="col-sm-9">
+                            {{ update_passwd.passwd2 }}
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-sm-offset-9 col-sm-10">
+                            <button type="button" class="btn btn-default" onclick="make_sure_update()">确认修改</button>
+                        </div>
+                    </div>
+                    {% csrf_token %}
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    var i = 1;
+    while (i <= '{{ unmakes }}') {
+        var red_light = '<img src="/static/unmakesure.gif" alt="" id="lights">';
+        $('#light').append(red_light);
+        i = i + 1
+    }
+
+    var j = 1;
+    while (j <= '{{ makes }}') {
+        var grend_light = '<img src="/static/complete.gif" alt="" id="lights"> ';
+        $('#light').append(grend_light);
+        j = j + 1
+    }
+</script>
+{#修改密码#}
+<script>
+    function update_passwd() {
+        $('#update_passwd_modal').modal('show');
+    }
+</script>
+{#确定修改密码#}
+<script>
+    function make_sure_update() {
+        $.ajax({
+            url: "/update_passwd/",
+            type: "POST",
+            dataType: 'json',
+            data: $('#update_passwd_form').serialize(),
+            async: false,
+            success: function (arr) {
+                if (arr != '') {
+                    alert(arr);
+                } else {
+                    window.location.replace('/');
+                }
+            }
+        })
+    }
+</script>
+
+{% block js %}
+
+{% endblock %}
+<script src="/static/js/brush_stats.js"></script>
+</body>
+</html>

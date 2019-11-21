@@ -1,0 +1,164 @@
+{% extends 'basc.html' %}
+{% block head %}
+    <link rel="stylesheet" href="/static/css/payment_summary.css">
+{% endblock %}
+{% block content %}
+    <form class="form-inline" action="/payment_summary/" method="post">
+        <div class="form-group">
+            <label for="exampleInputName2">起始日期</label>
+            <input type="date" class="form-control" id="start_date" value="{{ start_date }}" name="start_date" onchange="cheage_url()">
+        </div>
+        <div class="form-group">
+            <label for="exampleInputEmail2">截止日期</label>
+            <input type="date" class="form-control" id="end_date" value="{{ end_date }}" name="end_date" onchange="cheage_url()">
+        </div>
+{#        <div class="form-group">#}
+{#            <label for="exampleInputEmail2">数据类型</label>#}
+{#            <select name="data_type" class="form-control" id="data_type" onchange="cheage_url()">#}
+{#                <option value="sum">金额</option>#}
+{#                <option value="count">单量</option>#}
+{#            </select>#}
+{#        </div>#}
+        {% csrf_token %}
+        <button type="submit" class="btn btn-default">查询</button>
+        <a role="button" class="btn btn-default col-lg-offset-5" id="down" >下载</a>
+    </form>
+    <br>
+    <div class="table_div">
+{#        {% if data_type == '' %}#}
+            <table class="table table-bordered">
+                <tr>
+                    <th>序号</th>
+                    <th>店铺</th>
+                    <th>单量</th>
+                    <th>本金</th>
+                    <th>佣金</th>
+                    <th>刮刮卡</th>
+                    <th>微信红包</th>
+                    <th>好评追评删评价</th>
+                    <th>买家秀</th>
+                    <th>问大家</th>
+                    <th>优惠返差</th>
+                    <th>收藏加购</th>
+                    <th>手续费</th>
+                    <th>快递费</th>
+                    <th>直通车点击</th>
+                    <th>追回或补发</th>
+                    <th>直播订单返差</th>
+                    <th>借入</th>
+                    <th>借出</th>
+                    <th>合计</th>
+                </tr>
+                {% for table in tables %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ table.shopname }}</td>
+                        <td>{{ table.single }}</td>
+                        <td>{{ table.本金 }}</td>
+                        <td>{{ table.佣金 }}</td>
+                        <td>{{ table.刮刮卡 }}</td>
+                        <td>{{ table.红包 }}</td>
+                        <td>{{ table.好评追评删评价 }}</td>
+                        <td>{{ table.买家秀 }}</td>
+                        <td>{{ table.问大家 }}</td>
+                        <td>{{ table.优惠返差 }}</td>
+                        <td>{{ table.收藏加购 }}</td>
+                        <td>{{ table.手续费 }}</td>
+                        <td>{{ table.快递费 }}</td>
+                        <td>{{ table.直通车点击 }}</td>
+                        <td>{{ table.追回或补发 }}</td>
+                        <td>{{ table.直播订单返差 }}</td>
+                        <td>{{ table.借入 }}</td>
+                        <td>{{ table.借出 }}</td>
+                        <td>{{ table.All }}</td>
+                    </tr>
+                {% endfor %}
+            </table>
+{#        {% else %}#}
+{#            <table class="table table-bordered">#}
+{#                <tr>#}
+{#                    <th>序号</th>#}
+{#                    <th>店铺</th>#}
+{#                    <th>本金</th>#}
+{#                    <th>佣金</th>#}
+{#                    <th>刮刮卡</th>#}
+{#                    <th>微信红包</th>#}
+{#                    <th>好评、追评、删评价</th>#}
+{#                    <th>买家秀</th>#}
+{#                    <th>问大家</th>#}
+{#                    <th>优惠返差</th>#}
+{#                    <th>收藏、加购</th>#}
+{#                    <th>手续费</th>#}
+{#                    <th>快递费</th>#}
+{#                    <th>直通车点击</th>#}
+{#                    <th>多转追回、少转补发</th>#}
+{#                    <th>合计</th>#}
+{#                </tr>#}
+{#                {% for table in tables %}#}
+{#                    <tr>#}
+{#                        <td>{{ forloop.counter }}</td>#}
+{#                        <td>{{ table.shopname }}</td>#}
+{#                        <td>{{ table.1 }}</td>#}
+{#                        <td>{{ table.2 }}</td>#}
+{#                        <td>{{ table.3 }}</td>#}
+{#                        <td>{{ table.13 }}</td>#}
+{#                        <td>{{ table.10 }}</td>#}
+{#                        <td>{{ table.4 }}</td>#}
+{#                        <td>{{ table.5 }}</td>#}
+{#                        <td>{{ table.6 }}</td>#}
+{#                        <td>{{ table.11 }}</td>#}
+{#                        <td>{{ table.9 }}</td>#}
+{#                        <td>{{ table.8 }}</td>#}
+{#                        <td>{{ table.12 }}</td>#}
+{#                        <td>{{ table.7 }}</td>#}
+{#                        <td>{{ table.All }}</td>#}
+{#                    </tr>#}
+{#                {% endfor %}#}
+{#            </table>#}
+{#        {% endif %}#}
+    </div>
+{% endblock %}
+{% block js %}
+    <script>
+        if ('{{ err_msg }}' != '') {
+            alert('{{ err_msg }}')
+        }
+    </script>
+    {#付款类型默认选中#}
+    <script>
+        $("#data_type").find("option").each(function () {
+            var ff = '{{ data_type }}';
+            if ($(this).val() == ff) {
+                $(this).attr("selected", "selected");
+            }
+        });
+    </script>
+    {# 下载 #}
+    <script>
+        var start_date = $('#start_date').val();
+        var end_date = $('#end_date').val();
+        var data_type = $('#data_type').find("option:selected").val();
+        if (start_date == end_date) {
+            alert('起始日期和截止日期不能同一天')
+        }
+        else {
+            var down_url = '/downlode_payment_summary/?start_date=' + start_date + '&end_date=' + end_date + '&data_type=' + data_type;
+            $('#down').attr('href', down_url);
+        }
+    </script>
+    {# 动态生成下载url #}
+    <script>
+        function cheage_url() {
+            var start_date = $('#start_date').val();
+            var end_date = $('#end_date').val();
+            var data_type = $('#data_type').find("option:selected").val();
+            if (start_date == end_date) {
+                alert('起始日期和截止日期不能同一天')
+            }
+            else {
+                var down_url = '/downlode_payment_summary/?start_date=' + start_date + '&end_date=' + end_date + '&data_type=' + data_type;
+                $('#down').attr('href', down_url);
+            }
+        }
+    </script>
+{% endblock %}

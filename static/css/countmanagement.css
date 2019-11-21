@@ -1,0 +1,15 @@
+#tabless {
+    width: 90%;
+    height: 60%;
+    margin: 10px 0px;
+    overflow-y: auto;
+}
+
+#smar_img {
+    height: 32px;
+    width: 102px;
+}
+
+#smar_img:hover {
+    transform: scale(5, 15);
+}

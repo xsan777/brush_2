@@ -1,0 +1,98 @@
+{% extends 'basc.html' %}
+{% block head %}
+    <link rel="stylesheet" href="/static/css/check_account.css">
+{% endblock %}
+{% block content %}
+    <h2>总账户账单</h2>
+    <hr>
+    <form class="form-inline" id="check_data" method="post">
+        <div class="form-group">
+            <label for="exampleInputName2">日期:</label>
+            <input type="date" class="form-control" value="{{ now_time }}" name="check_data" onchange="cheage_down()" id="check_datas">
+        </div>
+        <div class="form-group">
+            <label for="exampleInputName2">账户名:</label>
+            <select name="account_name" id="account_name" class="form-control" onchange="cheage_down()">
+                {% for acc in total_account_all %}
+                    <option value="{{ acc.total_account_name }}">{{ acc.total_account_name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <input type="submit" value="查询" class="btn btn-default">
+        <a href="" id="down"><input type="button" value="按日下载" class="btn btn-default"></a>
+                <a href="" id="down2"><input type="button" value="按月下载" class="btn btn-default"></a>
+        {% csrf_token %}
+    </form>
+    <div id="tabless">
+        <table class="table table-striped">
+            <tr>
+                <th>序号</th>
+                <th>店铺</th>
+                <th>QQ或微信</th>
+                <th>旺旺号</th>
+                <th>线上订单号</th>
+                <th>成交日期</th>
+                <th>付款类型</th>
+                <th>付款金额</th>
+                <th>付款账户</th>
+                <th>备注</th>
+                <th>创建时间</th>
+                <th>操作人</th>
+            </tr>
+            {% for tables in table_list %}
+                {% for table in tables %}
+                    <tr id="{{ forloop.counter }}">
+                        <td id="num">{{ forloop.counter }}</td>
+                        <td>{{ table.shopname }}</td>
+                        <td>{{ table.qq_or_weixin }}</td>
+                        <td>{{ table.wang_wang_number }}</td>
+                        <td>{{ table.online_order_number }}</td>
+                        <td>{{ table.transaction_data }}</td>
+                        <td>{{ table.payment_type }}</td>
+                        <td>{{ table.payment_amount }}</td>
+                        <td>{{ table.payment_account.account_name }}</td>
+                        <td>{{ table.remarks }}</td>
+                        <td>{{ table.add_time }}</td>
+                        <td>{{ table.operator.username }}</td>
+                    </tr>
+                {% endfor %}
+            {% endfor %}
+        </table>
+    </div>
+    {#    <h3 class="col-lg-offset-8">喝酒花销：<span id="pay">{{ pay_money }}</span></h3>#}
+    {#    <h3 class="col-lg-offset-8">账户差额：<span id="actual">{{ actual_cost }}</span></h3>#}
+    {#    {% if count_stats == '该账户未确认' %}#}
+    {#        <h3 class="col-lg-offset-8">账户状态：<span id="actual" style="color: red">{{ count_stats }}</span></h3>#}
+    {#    {% else %}#}
+    {#        <h3 class="col-lg-offset-8">账户状态：<span id="actual">{{ count_stats }}</span></h3>#}
+    {#    {% endif %}#}
+{% endblock %}
+
+{% block js %}
+    <script>
+        $("#account_name").find("option").each(function () {
+            var ff = '{{ account_name }}';
+            if ($(this).val() == ff) {
+                $(this).attr("selected", "selected");
+            }
+        });
+    </script>
+    {#下载#}
+    <script>
+        var check_data = $('#check_datas').val();
+        var account_name = $('#account_name').val();
+        var down_url = '/down_total_account_brush/?check_data=' + check_data + '&account_name=' + account_name;
+        var down_url2 = '/down_total_account_brush2/?check_data=' + check_data + '&account_name=' + account_name;
+        $('#down').attr('href', down_url);
+        $('#down2').attr('href', down_url2);
+
+        function cheage_down() {
+            var check_data = $('#check_datas').val();
+            var account_name = $('#account_name').val();
+            var down_url = '/down_total_account_brush/?check_data=' + check_data + '&account_name=' + account_name;
+            var down_url2 = '/down_total_account_brush2/?check_data=' + check_data + '&account_name=' + account_name;
+            $('#down').attr('href', down_url);
+            $('#down2').attr('href', down_url2);
+        }
+    </script>
+{% endblock %}

@@ -1,0 +1,117 @@
+{% extends 'basc.html' %}
+{% block head %}
+    <link rel="stylesheet" href="/static/css/countmanagement.css">
+{% endblock %}
+{% block content %}
+<h2>子账户核对情况</h2>
+<hr>
+{#    查询日期设置#}
+<div class="col-lg-6">
+    <form action="/search_count/" class="form-horizontal" id="search_form">
+        <div class="form-group">
+            <div class="col-sm-4">
+                <input type="date" class="form-control" id="update_transaction_data" name="search_data" value="{{ nowss }}">
+            </div>
+            <input type="submit" value="查询" onclick="search()" class="btn btn-default">
+        </div>
+        {% csrf_token %}
+    </form>
+</div>
+{# 显示数据#}
+<div id="tabless">
+    <table class="table table-striped">
+        <tr>
+            <th>序号</th>
+            <th>日期</th>
+            <th>账户名</th>
+            <th>初始资金</th>
+            <th>结余资金</th>
+            <th>微信提现费用</th>
+            <th>前一天结余</th>
+            <th>转账资金截图</th>
+            <th>结余资金截图</th>
+            <th>微信提现费用截图</th>
+            <th>操作人</th>
+            <th>运营确认</th>
+            <th>操作</th>
+        </tr>
+        {% for table in count %}
+        <tr id="{{ forloop.counter }}">
+            <td id="num">{{ forloop.counter }}</td>
+            <td>{{ table.datess }}</td>
+            <td>{{ table.account_name.account_name }}</td>
+            <td>{{ table.start_money }}</td>
+            <td>{{ table.end_money }}</td>
+            <td>{{ table.weixin_withdraw_money }}</td>
+            <td>{{ table.last_end_money }}</td>
+            {#                    {% if  table.last_date_end_img != '前一日无截图' %}#}
+            {#                        <td><a href="/media/{{ table.last_date_end_img }}" onclick="big_img('{{ table.last_date_end_img }}')"#}
+            {#                               target="view_window"><img#}
+            {#                                src="/media/{{ table.last_date_end_img }}"#}
+            {#                                alt="" id="smar_img"></a></td>#}
+            {#                    {% else %}#}
+            {#                        <td>{{ table.last_date_end_img }}</td>#}
+{#            {% endif %}#}
+            {% if  table.start_money_img %}
+                <td><a href="/media/{{ table.start_money_img }}" onclick="big_img('{{ table.start_money_img }}')" target="view_window"><img
+                        src="/media/{{ table.start_money_img }}" alt="" id="smar_img"></a></td>
+            {% else %}
+                <td></td>
+            {% endif %}
+            {% if  table.end_money_img %}
+                <td><a href="/media/{{ table.end_money_img }}" target="view_window"><img src="/media/{{ table.end_money_img }}" alt=""
+                                                                                         id="smar_img"></a></td>
+            {% else %}
+                <td></td>
+            {% endif %}
+            {% if  table.weixin_img %}
+                <td><a href="/media/{{ table.weixin_img }}" target="view_window"><img src="/media/{{ table.weixin_img }}" alt=""
+                                                                                      id="smar_img"></a></td>
+            {% else %}
+                <td></td>
+            {% endif %}
+            <td>{{ table.operator.username }}</td>
+            {% if table.makes == 'False' %}
+                <td><span class="glyphicon glyphicon-remove" style="color: red"></span></td>
+            {% else %}
+                <td><span class="glyphicon glyphicon-ok" style="color: green"></span></td>
+            {% endif %}
+            {% if  table.operator.username  == user %}
+                <td><a class="glyphicon glyphicon-pencil" href="javascript:void(0);" onclick="edit_data({{ table.id }},this)" title="编辑"
+                       id="bsd"></a>
+                    <a class="glyphicon glyphicon-remove" href="javascript:void(0);" onclick="delete_data({{ table.id }},this)" title="删除"
+                       id="dele"></a>
+                </td>
+            {% else %}
+                <td></td>
+            {% endif %}
+        </tr>
+        {% endfor %}
+    </table>
+</div>
+{% endblock %}
+{% block js %}
+    <script>
+        $('#update_ids').hide();
+    </script>
+    {#查询验证#}
+    <script>
+        function search() {
+            var update_transaction_data = $('#update_transaction_data').val()
+            if (update_transaction_data == '') {
+                alert('查询时间不能为空')
+                return
+            }
+            else {
+                $.ajax({
+                    url: "/search_count/",
+                    type: "GET",
+                    dataType: 'json',
+                    data: $('#search_form').serialize(),
+                    async: true,
+                })
+            }
+        }
+
+    </script>
+{% endblock %}

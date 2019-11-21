@@ -1,0 +1,348 @@
+{% extends 'basc2.html' %}
+{% block head %}
+    <link rel="stylesheet" href="/static/css/check_account.css">
+{% endblock %}
+{% block content %}
+    <h2>子账户核对</h2>
+    <hr>
+    <form class="form-inline" id="check_data" method="post">
+        <div class="form-group">
+            <label for="exampleInputName2">日期:</label>
+            <input type="date" class="form-control" value="{{ now_time }}" name="check_data">
+        </div>
+        <div class="form-group">
+            <label for="exampleInputName2">账户名:</label>
+            <select name="payment_account" id="payment_account" class="form-control">
+                {% for acc in account %}
+                    <option value="{{ acc.account_name }}">{{ acc.account_name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <input type="submit" value="核对" class="btn btn-default">
+        {% csrf_token %}
+    </form>
+
+    {#显示数据#}
+    <div id="tabless">
+        <table class="table table-striped">
+            <tr>
+                <th>序号</th>
+                <th>店铺</th>
+                <th>QQ或微信</th>
+                <th>旺旺号</th>
+                <th>线上订单号</th>
+                <th>成交日期</th>
+                <th>付款类型</th>
+                <th>付款金额</th>
+                <th>付款账户</th>
+                <th>备注</th>
+                <th>创建时间</th>
+                <th>操作人</th>
+                <th>操作</th>
+            </tr>
+
+            {% for table in tables %}
+                <tr id="{{ forloop.counter }}">
+                    <td id="num">{{ forloop.counter }}</td>
+                    <td>{{ table.shopname }}</td>
+                    <td>{{ table.qq_or_weixin }}</td>
+                    <td><span data-container="body" data-toggle="popover" data-placement="right" data-content=""
+                              id="search_wangwang" data-html="true">{{ table.wang_wang_number }}</span></td>
+                    <td>{{ table.online_order_number }}</td>
+                    <td>{{ table.transaction_data }}</td>
+                    <td>{{ table.payment_type }}</td>
+                    <td>{{ table.payment_amount }}</td>
+                    <td>{{ table.payment_account.account_name }}</td>
+                    <td>{{ table.remarks }}</td>
+                    <td>{{ table.add_time }}</td>
+                    <td>{{ table.operator.username }}</td>
+                    {% if user == table.operator.username %}
+                        <td><a class="glyphicon glyphicon-pencil" href="javascript:void(0);" onclick="edit_data({{ table.id }},this)" title="编辑"
+                               id="bsd"></a>
+                            {% if delete_flog == True %}
+                                <a class="glyphicon glyphicon-remove" href="javascript:void(0);" onclick="delete_data({{ table.id }},this)" title="删除"
+                                   id="dele"></a>
+                            {% endif %}
+                        </td>
+                    {% else %}
+                        <td></td>
+                    {% endif %}
+                </tr>
+            {% endfor %}
+        </table>
+    </div>
+    {#修改数据的模态框#}
+    {#    <div class="modal fade" tabindex="-1" role="dialog" aria-labelledby="gridSystemModalLabel" id="edit_model">#}
+    <div class="modal fade" tabindex="-1" role="dialog" id="edit_model">
+
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="gridSystemModalLabel">修改喝酒数据</h4>
+                </div>
+                <div class="modal-body">
+                    <form class="form-horizontal" id="update_form">
+                        <div class="form-group">
+                            <label for="inputEmail3" class="col-sm-3 control-label">店铺名</label>
+                            <div class="col-sm-9">
+                                <select name="shopname" class="form-control" id="update_shopname">
+                                    {% for shopss in shops %}
+                                        <option value="{{ shopss }}">{{ shopss }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="inputEmail3" class="col-sm-3 control-label">QQ或微信</label>
+                            <div class="col-sm-9">
+                                {{ edit_brush_form.qq_or_weixin }}
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="inputEmail3" class="col-sm-3 control-label">旺旺号</label>
+                            <div class="col-sm-9">
+                                {{ edit_brush_form.wang_wang_number }}
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="inputEmail3" class="col-sm-3 control-label">线上订单号</label>
+                            <div class="col-sm-9">
+                                <input type="text" class="form-control" id="update_online_order_number" placeholder="线上订单号"
+                                       name="online_order_number">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="inputEmail3" class="col-sm-3 control-label">成交日期</label>
+                            <div class="col-sm-9">
+                                <input type="date" class="form-control" id="update_transaction_data" name="transaction_data">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="inputEmail3" class="col-sm-3 control-label">付款类型</label>
+                            <div class="col-sm-9">
+                                <select name="payment_type" id="update_payment_type" class="form-control">
+                                    {% for pay_type in payment_type_all %}
+                                        <option value="{{ pay_type.types }}">{{ pay_type.types }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="inputEmail3" class="col-sm-3 control-label">付款金额</label>
+                            <div class="col-sm-9">
+                                {{ edit_brush_form.payment_amount }}
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="inputEmail3" class="col-sm-3 control-label">付款账户</label>
+                            <div class="col-sm-9">
+                                <select name="payment_account" id="update_payment_account" class="form-control">
+                                    {% for acc in account %}
+                                        <option value="{{ acc.account_name }}">{{ acc.account_name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="inputEmail3" class="col-sm-3 control-label">备注</label>
+                            <div class="col-sm-9">
+                                <input type="text" class="form-control" id="update_remarks" placeholder="备注" name="remarks">
+                                <input type="text" id="update_ids" value="" name="id">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-sm-offset-9 col-sm-10">
+                                <button type="button" class="btn btn-default" onclick="make_sure()">确认修改</button>
+                            </div>
+                        </div>
+                        {% csrf_token %}
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <h3 class="col-lg-offset-8">喝酒花销：<span id="pay">{{ pay_money }}</span></h3>
+    <h3 class="col-lg-offset-8">提现费用：<span id="pay">{{ weixin_withdraw_moneys }}</span></h3>
+    <h3 class="col-lg-offset-8">账户差额：<span id="actual">{{ actual_cost }}</span></h3>
+    <input type="button" onclick="make()" value="核对确认" class="btn btn-info col-lg-offset-8" id="make">
+{% endblock %}
+{% block js %}
+    <script>
+        {#表格里的旺旺号查询#}
+        $('span#search_wangwang').hover(function () {
+                $('[data-toggle="popover"]').popover();
+                var wangwang_num = $(this).text();
+                $.ajax({
+                    url: "/erp/search_by_wangwang_num/",
+                    type: "GET",
+                    dataType: 'json',
+                    data: {'wangwang_num': wangwang_num},
+                    async: false,
+                    success: function (msg) {
+                        $('span#search_wangwang').attr('data-content', msg);
+                    },
+                    error: function () {
+                        $('span#search_wangwang').attr('data-content', '该旺旺号之前没有喝酒');
+                    }
+                });
+                $(this).popover('show');
+            }, function () {
+                $(this).popover('hide');
+                $('span#search_wangwang').attr('data-content', '');
+            }
+        );
+    </script>
+    {#子账户选框默认选中#}
+    <script>
+        $("#payment_account").find("option").each(function () {
+            var ff = '{{ account_select }}';
+            if ($(this).val() == ff) {
+                $(this).attr("selected", "selected");
+            }
+        });
+    </script>
+    <script>
+        var errs = '{{ errs }}';
+        if (errs != '') {
+            alert(errs)
+        }
+    </script>
+    <script>
+        $('#update_ids').hide();
+        $('#make').hide();
+        if ('{{ actual_err }}' != '') {
+            var actual_errs = '<h3><span id="errsss" >' + '{{ actual_err }}' + '</span></h3>';
+            $('#actual').append(actual_errs)
+        } else {
+            if ('{{ pay_money_all }}' == '{{ actual_cost }}') {
+                $('#make').show();
+            }
+        }
+        if ('{{ makes_stats }}' == 'True') {
+            $('#make').attr("value", "已确认");
+            $('#make').prop("disabled", true);
+        } else {
+            $('#make').attr("value", "核对确认");
+            $('#make').prop("disabled", false);
+        }
+    </script>
+    <script>
+        $("#payment_account").find("option").each(function () {
+            var ff = '{{ payment_account }}';
+            if ($(this).val() == ff) {
+                $(this).attr("selected", "selected");
+            }
+        });
+    </script>
+    {#    确认核对账户#}
+    <script>
+        function make() {
+            $.ajax({
+                url: "/make_account/",
+                type: "GET",
+                dataType: 'json',
+                data: $('#check_data').serialize(),
+                async: true,
+                success: function (arg) {
+                    $('#make').attr("value", "已确认");
+                    $('#make').prop("disabled", true);
+                    window.location.replace('/check_account/');
+                }
+            })
+        }
+    </script>
+    {#修改数据#}
+    <script>
+        function edit_data(mm, sd) {
+            var kj = $(sd).parent().parent().attr('id');
+            $.ajax({
+                url: "/edit/",
+                type: "GET",
+                dataType: 'json',
+                data: {'id': mm, 'num': kj},
+                async: true,
+                success: function (arg) {
+                    $("#update_shopname").find("option").each(function () {
+                        if ($(this).val() == arg['shopname']) {
+                            $(this).attr("selected", "selected");
+                        }
+                    });
+                    $('#update_qq_or_weixin').attr('value', arg['qq_or_weixin']);
+                    $('#update_wang_wang_number').attr('value', arg['wang_wang_number']);
+                    $('#update_online_order_number').attr('value', arg['online_order_number']);
+                    $('#update_transaction_data').attr('value', arg['transaction_data']);
+                    $("#update_payment_type").find("option").each(function () {
+                        if ($(this).val() == arg['payment_type']) {
+                            $(this).attr("selected", "selected");
+                        }
+                    });
+                    $('#update_payment_amount').attr('value', arg['payment_amount']);
+                    $("#update_payment_account").find("option").each(function () {
+                        if ($(this).val() == arg['payment_account']) {
+                            $(this).attr("selected", "selected");
+                        }
+                    });
+                    $('#update_remarks').attr('value', arg['remarks']);
+                    $('#update_ids').attr('value', arg['ids']);
+                    $('#edit_model').modal('show');
+                },
+
+            })
+        }
+    </script>
+    {#确定修改数据#}
+    <script>
+        function make_sure() {
+            var update_qq_or_weixin = $('#update_qq_or_weixin').val();
+            var update_wang_wang_number = $('#update_wang_wang_number').val();
+            var update_online_order_number = $('#update_online_order_number').val();
+            var update_payment_amount = $('#update_payment_amount').val();
+            var update_payment_type = $('#update_payment_type').val();
+            var update_remarks = $('#update_remarks').val();
+            if (update_wang_wang_number != '' && update_payment_amount != '' && update_qq_or_weixin != '') {
+                if (update_payment_type == '买家秀' || update_payment_type == '其他') {
+                    if (update_remarks == '') {
+                        alert("付款类型为‘买家秀’或‘其他’时，必须填写备注");
+                        return
+                    }
+                }
+                {#if (update_online_order_number == '' && update_payment_type != '刮刮卡') {#}
+                {#    alert("付款类型不为刮刮卡，必须填写线上订单号")#}
+                {#    return#}
+                {# } #}
+                $.ajax({
+                    url: "/edit/",
+                    type: "POST",
+                    dataType: 'json',
+                    data: $('#update_form').serialize(),
+                    async: false,
+                    success: function (msg) {
+                        if (msg == '') {
+                            window.location.replace('/check_account/');
+                        } else {
+                            alert(msg)
+                        }
+                    }
+                })
+            }
+        }
+    </script>
+    {#删除数据#}
+    <script>
+        function delete_data(mm, sd) {
+            $.ajax({
+                url: "/deletes/",
+                type: "GET",
+                dataType: 'json',
+                data: {'id': mm},
+                async: true,
+                success: function () {
+                    window.location.reload()
+                }
+            })
+            window.location.reload()
+        }
+    </script>
+
+{% endblock %}

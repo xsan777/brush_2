@@ -1,0 +1,449 @@
+{% extends 'basc.html' %}
+{% block head %}
+    <link rel="stylesheet" href="/static/css/user.css">
+{% endblock %}
+{% block content %}
+    <h2>添加用户</h2>
+    <hr>
+    <form class="form-inline" action="/adduser/" method="post">
+        <div class="form-group">
+            <label for="inputEmail3"><span style="color: red">*</span>&nbsp;&nbsp;&nbsp;用户名</label>&nbsp;&nbsp;
+            {{ add_form.username }}
+            <span style="color: red" id="err"></span>
+        </div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <div class="form-group">
+            <label for="inputPassword3"><span style="color: red">*</span>&nbsp;&nbsp;&nbsp;密码</label>&nbsp;&nbsp;
+            {{ add_form.passwd }}
+        </div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <div class="form-group">
+            <label for="inputPassword3"><span style="color: red">*</span>&nbsp;&nbsp;&nbsp;确认密码</label>&nbsp;&nbsp;
+            {{ add_form.passwd2 }}<span style="color: red">{{ err_msg }}</span>
+        </div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <div class="form-group">
+            <label for="inputPassword3"><span style="color: red">*</span>&nbsp;&nbsp;&nbsp;角色</label>&nbsp;&nbsp;
+            <select name="rose" id="rose" class="form-control" onchange="cheage_rouse()">
+                <option value="运营">运营</option>
+                <option value="财务">财务</option>
+            </select>
+        </div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <div class="form-group">
+            <label for="inputEmail3"><span style="color: red">*</span>&nbsp;&nbsp;&nbsp;职位描述</label>&nbsp;&nbsp;
+            {{ add_form.description }}
+        </div>
+        <br>
+        <br>
+        <div class="form-group">
+            <label for="inputPassword3"><span style="color: red">*</span>&nbsp;&nbsp;&nbsp;店铺选择</label>
+            <div class="checkbox col-sm-12 ">
+                <label class="checkbox-inline">
+                    <input type="checkbox" id="inlineCheckbox1" class="allAndNotAll" value="all">全选
+                </label>
+                {% for shop in shops %}
+                    <label class="checkbox-inline ">
+                        <input type="checkbox" id="inlineCheckbox1" value="{{ shop.shopname }}" name="checkitem"> {{ shop.shopname }}
+                    </label>
+                {% endfor %}
+            </div>
+        </div>
+        <br>
+        <br>
+        <div class="form-group">
+            <label for="inputPassword3"><span style="color: red">*</span>&nbsp;&nbsp;&nbsp;总账户选择</label>
+            <div class="checkbox col-sm-12 ">
+                <label class="checkbox-inline">
+                    <input type="checkbox" id="inlineCheckbox3" class="allAndNotAll3" value="all">全选
+                </label>
+                {% for accounts in total_account %}
+                    <label class="checkbox-inline ">
+                        <input type="checkbox" id="inlineCheckbox3" value="{{ accounts.total_account_name }}"
+                               name="total_accounts"> {{ accounts.total_account_name }}
+                    </label>
+                {% endfor %}
+            </div>
+        </div>
+        <br>
+        <br>
+        <div class="col-lg-offset-10 ">
+            <input type="submit" class="btn btn-default" value="创建" id="creates">
+        </div>
+        {% csrf_token %}
+    </form>
+
+    <hr>
+    {#搜索用户信息#}
+    <div class="col-lg-offset-8">
+        <form action="" class="form-horizontal">
+            <div class="form-group">
+                <label for="inputEmail3" class="col-sm-3 control-label">搜索用户信息</label>
+                <div class="col-sm-4">
+                    <input type="text" class="form-control" id="inputEmail3" placeholder="用户名" name="username">
+                </div>
+                <input type="submit" class="btn btn-default" value="查询">
+            </div>
+            {% csrf_token %}
+        </form>
+    </div>
+    {#显示信息#}
+    <div id="tabless">
+        <table class="table table-striped">
+            <tr>
+                <th>序号</th>
+                <th>用户名</th>
+                <th>角色</th>
+                <th>职位描述</th>
+                <th>店铺</th>
+                <th>使用的总账户</th>
+                <th>操作</th>
+            </tr>
+            {% for table in tables %}
+                <tr id="{{ forloop.counter }}">
+                    <td id="num">{{ forloop.counter }}</td>
+                    <td>{{ table.username }}</td>
+                    <td>{{ table.rouse }}</td>
+                    <td>{{ table.description }}</td>
+                    <td>{{ table.shop }}</td>
+                    <td>{{ table.total_accounts }}</td>
+                    <td><a class="glyphicon glyphicon-pencil" href="javascript:void(0);" onclick="edit_data({{ table.id }},this)" title="编辑"
+                           id="bsd"></a>
+                        <a class="glyphicon glyphicon-remove" href="javascript:void(0);" onclick="delete_data({{ table.id }},this)" title="删除"
+                           id="dele"></a>
+                    </td>
+                </tr>
+            {% endfor %}
+        </table>
+    </div>
+    {#修改数据的模态框#}
+    <div class="modal fade" tabindex="-1" role="dialog" id="edit_model">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="gridSystemModalLabel">修改用户信息</h4>
+                </div>
+                <div class="modal-body">
+                    <form class="form-horizontal" id="update_form" method="post">
+                        <div class="form-group">
+                            <label for="inputEmail3" class="col-sm-3 control-label"><span style="color: red">*</span>&nbsp;&nbsp;&nbsp;用户名</label>
+                            <div class="col-sm-9">
+                                {{ edit_user.username }}
+                                <span style="color: red" id="err2"></span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="exampleInputName2" class="col-sm-3 control-label"><span style="color: red">*</span>&nbsp;&nbsp;&nbsp;密码</label>
+                            <div class="col-sm-9">
+                                {{ edit_user.passwd }}
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="exampleInputName2" class="col-sm-3 control-label"><span style="color: red">*</span>&nbsp;&nbsp;&nbsp;确认密码</label>
+                            <div class="col-sm-9">
+                                {{ edit_user.passwd2 }}
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="exampleInputName2" class="col-sm-3 control-label"><span style="color: red">*</span>&nbsp;&nbsp;&nbsp;角色</label>
+                            <div class="col-sm-9">
+                                <select name="rose" id="edit_rose" class="form-control" onchange="edit_cheage_rouse()">
+                                    <option value="运营">运营</option>
+                                    <option value="财务">财务</option>
+                                </select>
+                            </div>
+                            <input type="text" id="update_ids" value="" name="update_ids">
+                        </div>
+                        <div class="form-group">
+                            <label for="exampleInputName2" class="col-sm-3 control-label"><span style="color: red">*</span>&nbsp;&nbsp;&nbsp;职位描述</label>
+                            <div class="col-sm-9">
+                                {{ edit_user.description }}
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="exampleInputName2" class="col-sm-3 control-label"><span style="color: red">*</span>&nbsp;&nbsp;&nbsp;店铺</label>
+                            <div class="col-sm-9">
+                                <div class=" checkbox">
+                                    <label class="checkbox-inline">
+                                        <input type="checkbox" id="inlineCheckbox12" class="allAndNotAll2" value="all">全选
+                                    </label>
+                                    {% for shop in shops %}
+                                        <label class="checkbox-inline">
+                                            <input type="checkbox" id="inlineCheckbox12" value="{{ shop.shopname }}"
+                                                   name="checkitem"> {{ shop.shopname }}
+                                        </label>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="inputPassword3" class="col-sm-3 control-label"><span style="color: red">*</span>&nbsp;&nbsp;&nbsp;总账户选择</label>
+                                <div class="col-sm-9">
+                                    <div class="checkbox ">
+                                        <label class="checkbox-inline">
+                                            <input type="checkbox" id="inlineCheckbox4" class="allAndNotAll4" value="all">全选
+                                        </label>
+                                        {% for accounts in total_account %}
+                                            <label class="checkbox-inline ">
+                                                <input type="checkbox" id="inlineCheckbox4" value="{{ accounts.total_account_name }}"
+                                                       name="edit_total_brank_accounts"> {{ accounts.total_account_name }}
+                                            </label>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-sm-offset-9 col-sm-10">
+                                <button type="button" class="btn btn-default" onclick="make_sure()">确认修改</button>
+                            </div>
+                        </div>
+                        {% csrf_token %}
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block js %}
+    <script>
+        $('#update_ids').hide();
+    </script>
+    {#角色为财务时店铺默认全选并禁止改动#}
+    <script>
+        function cheage_rouse() {
+            var roues = $("#rose option:selected").val();
+            if (roues == '财务') {
+                $("input[id=inlineCheckbox1]:checkbox").each(function () {
+                    $(this).prop("checked", true);
+                    $(this).prop("disabled", true);
+                });
+                $("input[id=inlineCheckbox3]:checkbox").each(function () {
+                    $(this).prop("checked", true);
+                    $(this).prop("disabled", true);
+                });
+            }
+            else {
+                $("input[id=inlineCheckbox1]:checkbox").each(function () {
+                    $(this).prop("checked", false);
+                    $(this).prop("disabled", false);
+                });
+                $("input[id=inlineCheckbox3]:checkbox").each(function () {
+                    $(this).prop("checked", false);
+                    $(this).prop("disabled", false);
+                });
+            }
+        }
+    </script>
+    {#创建修改验证#}
+    <script>
+        {#    添加数据#}
+        var mesg = '必须选择店铺';
+        var msgs = '{{ msgs }}';
+        if (msgs == mesg) {
+            alert(msgs)
+        }
+
+        {#验证用户名是否存在#}
+
+        function verification_username() {
+            var user = $('input#username').val();
+            $.ajax({
+                url: "/verification_username/",
+                type: "GET",
+                dataType: 'json',
+                data: {'username': user},
+                async: false,
+                success: function (msg) {
+                    $('#err').text(msg);
+                    if (msg == '用户名已存在') {
+                        $('#creates').attr('type', 'button');
+                    }
+                    else {
+                        $('#creates').attr('type', 'submit');
+                    }
+                }
+            });
+        }
+
+        {#修改验证#}
+
+        function edit_verification_username() {
+            var user = $('input#eidt_username').val();
+            $.ajax({
+                url: "/verification_username/",
+                type: "GET",
+                dataType: 'json',
+                data: {'username': user},
+                async: false,
+                success: function (msg) {
+                    $('#err2').text(msg);
+                }
+
+            });
+        }
+    </script>
+    {#选择店铺#}
+    <script>
+        //实现全选与反选
+        $(".allAndNotAll").click(function () {
+            if ($(this).prop("checked")) {
+                $("input[id=inlineCheckbox1]:checkbox").each(function () {
+                    $(this).prop("checked", true);
+                });
+            } else {
+                $("input[id=inlineCheckbox1]:checkbox").each(function () {
+                    $(this).prop("checked", false);
+                });
+            }
+        });
+        //当其中不勾选某一个选项的时候,则去掉全选复选框
+        $(":checkbox[name=checkitem]").click(function () {
+            $(".allAndNotAll").prop('checked',
+                $(":checkbox[id=inlineCheckbox1]").length == $(":checkbox[id=inlineCheckbox1]:checked").length);
+        });
+    </script>
+    {#选择总账户#}
+    <script>
+        //实现全选与反选
+        $(".allAndNotAll3").click(function () {
+            if ($(this).prop("checked")) {
+                $("input[id=inlineCheckbox3]:checkbox").each(function () {
+                    $(this).prop("checked", true);
+                });
+            } else {
+                $("input[id=inlineCheckbox3]:checkbox").each(function () {
+                    $(this).prop("checked", false);
+                });
+            }
+        });
+        //当其中不勾选某一个选项的时候,则去掉全选复选框
+        $(":checkbox[name=total_accounts]").click(function () {
+            $(".allAndNotAll3").prop('checked',
+                $(":checkbox[id=inlineCheckbox3]").length == $(":checkbox[id=inlineCheckbox3]:checked").length);
+        });
+    </script>
+    {#    修改数据选择店铺#}
+    <script>
+        //实现全选与反选
+        $(".allAndNotAll2").click(function () {
+            if ($(this).prop("checked")) {
+                $("input[id=inlineCheckbox12]:checkbox").each(function () {
+                    $(this).prop("checked", true);
+                });
+            } else {
+                $("input[id=inlineCheckbox12]:checkbox").each(function () {
+                    $(this).prop("checked", false);
+                });
+            }
+        });
+        //当其中不勾选某一个选项的时候,则去掉全选复选框
+        $(":checkbox[name=checkitem]").click(function () {
+            $(".allAndNotAll2").prop('checked',
+                $(":checkbox[id=inlineCheckbox12]").length == $(":checkbox[id=inlineCheckbox12]:checked").length);
+        });
+
+    </script>
+
+    {#    修改数据选择总账户#}
+    <script>
+        //实现全选与反选
+        $(".allAndNotAll4").click(function () {
+            if ($(this).prop("checked")) {
+                $("input[id=inlineCheckbox4]:checkbox").each(function () {
+                    $(this).prop("checked", true);
+                });
+            } else {
+                $("input[id=inlineCheckbox4]:checkbox").each(function () {
+                    $(this).prop("checked", false);
+                });
+            }
+        });
+        //当其中不勾选某一个选项的时候,则去掉全选复选框
+        $(":checkbox[name=edit_total_brank_accounts]").click(function () {
+            $(".allAndNotAll4").prop('checked',
+                $(":checkbox[id=inlineCheckbox4]").length == $(":checkbox[id=inlineCheckbox4]:checked").length);
+        });
+    </script>
+    {#修改数据#}
+    <script>
+        function edit_data(mm, sd) {
+            $.ajax({
+                url: "/edit_user/",
+                type: "GET",
+                dataType: 'json',
+                data: {'id': mm},
+                async: true,
+                success: function (arg) {
+                    $("#rose").find("option").each(function () {
+                        if ($(this).val() == arg['rose']) {
+                            $(this).attr("selected", "selected");
+                        }
+                    });
+                    $('#eidt_username').attr('value', arg['username']);
+                    $('#eidt_passwd').attr('value', arg['passwd']);
+                    $('#eidt_passwd2').attr('value', arg['passwd']);
+                    $('#eidt_description').attr('value', arg['description']);
+                    $('#update_ids').attr('value', arg['ids']);
+                    $('#edit_model').modal('show');
+                }
+            })
+        }
+
+        function edit_cheage_rouse() {
+            var roues = $("#edit_rose option:selected").val();
+            if (roues == '财务') {
+                $("input[id=inlineCheckbox12]:checkbox").each(function () {
+                    $(this).prop("checked", true);
+                    $(this).prop("disabled", true);
+                });
+                $("input[id=inlineCheckbox4]:checkbox").each(function () {
+                    $(this).prop("checked", true);
+                    $(this).prop("disabled", true);
+                });
+            }
+            else {
+                $("input[id=inlineCheckbox12]:checkbox").each(function () {
+                    $(this).prop("checked", false);
+                    $(this).prop("disabled", false);
+                });
+                $("input[id=inlineCheckbox4]:checkbox").each(function () {
+                    $(this).prop("checked", false);
+                    $(this).prop("disabled", false);
+                });
+            }
+        }
+    </script>
+    {#确定修改数据#}
+    <script>
+        function make_sure() {
+            $.ajax({
+                url: "/edit_user/",
+                type: "POST",
+                dataType: 'json',
+                data: $('#update_form').serialize(),
+                async: false,
+                success: function (arr) {
+                    if (arr['err'] != '') {
+                        alert(arr['err']);
+                    }
+                    else {
+                        window.location.replace('/usermanagement/');
+                    }
+                }
+            })
+        }
+    </script>
+    {#删除数据#}
+    <script>
+        function delete_data(mm, sd) {
+            $.ajax({
+                url: "/deletes_user/",
+                type: "GET",
+                dataType: 'json',
+                data: {'id': mm},
+                async: false,
+                success: function () {
+                }
+            });
+            window.location.replace("/adduser/")
+        }
+    </script>
+{% endblock %}

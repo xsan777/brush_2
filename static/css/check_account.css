@@ -1,0 +1,17 @@
+#tabless {
+    width: 95%;
+    height: 55%;
+    margin: 10px 0px;
+    overflow-y: auto;
+}
+
+#errsss {
+    color: red;
+}
+#smar_img {
+    height: 32px;
+    width: 102px;
+}
+#smar_img:hover {
+    transform: scale(5, 15);
+}

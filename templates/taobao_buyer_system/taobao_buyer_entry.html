@@ -1,0 +1,98 @@
+{% extends 'basc2.html' %}
+{% block head %}
+    <link rel="stylesheet" href="/static/css/upload_excel.css">
+{% endblock %}
+{% block content %}
+    <p></p>
+    <form class="form-inline" action="{% url 'taobao_buyer_entry' %}" method="post" enctype="multipart/form-data">
+        <div class="form-group">
+            <label for="exampleInputName2"><span style="color: red">*</span>&nbsp;&nbsp;&nbsp;上传淘客数据excel表格:</label>
+            <input type="file" name="excels">
+        </div>
+        <input type="submit" value="上传文件" class="btn btn-default">
+
+        {#        <button type="button" class="btn btn-default col-lg-offset-6" value="批量导入数据" id="upload_data" onclick="submitss()">批量导入数据</button>#}
+        {#        <a href="/template_file_download/" class="col-lg-offset-1">下载模板文件</a>#}
+        {% csrf_token %}
+    </form>
+    <hr>
+    <div id="tabless">
+        <table class="table table-striped">
+            <tr>
+                <th>序号</th>
+                <th>下单时间</th>
+                <th>下单店铺</th>
+                <th>旺旺号</th>
+                <th>创建时间</th>
+                <th>操作人</th>
+            </tr>
+            {% for table in tables %}
+                <tr class="rowss" id="{{ forloop.counter }}">
+                    {# <tr id="{{ forloop.counter }}">#}
+                    <td id="row_num">{{ forloop.counter }}</td>
+                    <td id="pay_date">{{ table.pay_date }} </td>
+                    <td  id="shop_name">{{ table.shop_name }}</td>
+                    <td  id="shop_buyer_id">{{ table.shop_buyer_id }}</td>
+                    <td  id="add_time">{{ table.add_time }}</td>
+                    <td  id="operator">{{ table.operator }}</td>
+                </tr>
+            {% endfor %}
+        </table>
+    </div>
+    <div id="errs_head">
+        {#        <h3>上传数据的数据存在的问题</h3>#}
+        <h3>操作记录：</h3>
+    </div>
+    {#    <div id="errs2_head">#}
+    {#        <h3>批量导入的数据存在的问题</h3>#}
+    {#    </div>#}
+    <div id="errs">
+        {{ err_msg|safe }}
+    </div>
+
+    {#    <div id="errs2">#}
+    {##}
+    {#    </div>#}
+    {#    提示信息的模态框#}
+    <div class="modal fade" tabindex="-1" role="dialog" id="upload_message_modal">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">提示</h4>
+                </div>
+                <div class="modal-body">
+                    <div id="upload_message_modal_head">
+                        成功录入{{ success_num }}条数据，失败{{ exit_num }}条数据
+                    </div>
+
+                    <div id="upload_message_modal_body">
+                        {{ err_msg|safe }}
+                    </div>
+                    <div id="upload_message_modal_body_2">
+
+                    </div>
+
+                    <div id="upload_message_modal_footer">
+
+                    </div>
+                </div>
+                <br>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                    {#<button type="button" class="btn btn-primary">Save changes</button>#}
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div><!-- /.modal -->
+{% endblock %}
+{% block js %}
+    <script>
+        if ('{{ errs }}' != '') {
+            alert('{{ errs }}')
+        }
+        if ('{{ flog }}' == 1) {
+            $('#upload_message_modal').modal('show');
+        }
+    </script>
+{% endblock %}

@@ -1,0 +1,10 @@
+td {
+    text-align: center
+}
+th  {
+    text-align: center
+}
+.table_div{
+    height: 700px;
+    overflow-y: auto;
+}

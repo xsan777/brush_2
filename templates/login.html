@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>宝儿喝酒数据管理-登录</title>
+    <link rel="stylesheet" href="/static/css/loging.css">
+    <script src="/static/js/jquery-3.3.1.min.js"></script>
+    <link rel="stylesheet" href="/static/css/bootstrap.min.css">
+    <script src="/static/js/bootstrap.min.js"></script>
+    {#    <script src="/static/js/index2.js"></script>#}
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+</head>
+<body>
+<div class="box">
+    <div id="loging">
+        <form id="loging_form" method="post" action="/">
+            <div class="form-group col-lg-2">
+                {#                <label for="exam2leInputPassword1">用户名</label>#}
+                <input type="text" class="form-control " placeholder="用户名" name="user">
+            </div>
+            <br>
+            <br>
+            <br>
+            <div class="form-group col-lg-2">
+                {#                <label for="exampleInputPassword1">密码</label>#}
+                <input type="password" class="form-control" id="exampleInputPassword1" placeholder="密码" name="passwd">
+            </div>
+
+
+            <br>
+            <br>
+            <br>
+            <div class="form-group col-lg-2">
+                <div style="color: red">{{ err_msg }}</div>
+                <button type="submit" class="btn btn-default form-control"><b id="login_font">登&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp 录</b></button>
+            </div>
+
+            {% csrf_token %}
+        </form>
+    </div>
+</div>
+</body>
+<script>
+    {#alert({{ err_msg }})#}
+</script>
+</html>

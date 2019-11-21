@@ -1,0 +1,106 @@
+* {
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    height: 100%;
+    background-color: #3d3d3d;
+}
+
+#left_nav {
+    float: left;
+    background-color: #3d3d3d;
+    width: 12%;
+    height: 100%;
+}
+
+#content {
+    /*margin-top: 50px;*/
+    float: left;
+    width: 88%;
+    height: 850px;
+    background-color: white;
+}
+
+#cont {
+    width: 95%;
+    height: 100%;
+    margin: 0 50px 0 50px;
+}
+
+#nav {
+    background-color: #212121;
+    height: 50px;
+}
+
+#logo {
+    padding-top: 10px;
+    margin-left: 20px;
+    font-size: 1.5em;
+    color: #ffffff;
+}
+
+.menu {
+    padding-top: 15px;
+    text-align: left;
+    font-size: 1.3em;
+    color: white;
+}
+
+.menus {
+    padding-bottom: 5px;
+    text-align: center;
+    font-size: 1.3em;
+    color: white;
+    background-color: #2e3636;
+}
+
+.menus:hover {
+    background-color: #3c3d22;
+}
+
+a:hover {
+    text-decoration: none
+}
+
+hr#nav_hr {
+    width: 90%;
+    height: 1px;
+    background-color: #585858;
+    margin-bottom: -5px;
+    border: none;
+}
+
+hr {
+    width: 90%;
+    height: 1px;
+    background-color: #585858;
+
+    border: none;
+}
+
+#remind {
+    height: 10px;
+    font-size: small;
+    color: red;
+}
+
+#lights {
+    width: 25px;
+    height: 25px;
+}
+
+.left_nav {
+    float: left;
+}
+
+.right_nav {
+    float: right;
+    margin-right: 40px;
+}
+
+#nav_user {
+    font-size: 1.8rem;
+    color: white;
+}

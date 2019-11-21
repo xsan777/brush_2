@@ -1,0 +1,43 @@
+{% extends 'basc2.html' %}
+{% block head %}
+    <link rel="stylesheet" href="/static/css/upload_excel.css">
+{% endblock %}
+{% block content %}
+    <h3></h3>
+    <p></p>
+    <form class="form-inline" action="{% url 'search_taobao_buyer_information' %}" method="post">
+        <div class="form-group">
+            <label for="exampleInputName2"><span style="color: red">*</span>&nbsp;&nbsp;&nbsp; 旺旺号:</label>
+            <input type="text" name="wang_wang_num" class="form-control" required="required">
+        </div>
+        <input type="submit" value="查询" class="btn btn-default">
+
+        {#        <button type="button" class="btn btn-default col-lg-offset-6" value="批量导入数据" id="upload_data" onclick="submitss()">批量导入数据</button>#}
+        {#        <a href="/template_file_download/" class="col-lg-offset-1">下载模板文件</a>#}
+        {% csrf_token %}
+    </form>
+    <hr>
+    <div id="tabless">
+        <table class="table table-striped">
+            <tr>
+                <th>序号</th>
+                <th>下单时间</th>
+                <th>下单店铺</th>
+                <th>旺旺号</th>
+                <th>创建时间</th>
+                <th>操作人</th>
+            </tr>
+            {% for table in tables %}
+                <tr class="rowss" id="{{ forloop.counter }}">
+                    {# <tr id="{{ forloop.counter }}">#}
+                    <td id="row_num">{{ forloop.counter }}</td>
+                    <td id="pay_date">{{ table.pay_date }} </td>
+                    <td id="shop_name">{{ table.shop_name }}</td>
+                    <td id="shop_buyer_id">{{ table.shop_buyer_id }}</td>
+                    <td id="add_time">{{ table.add_time }}</td>
+                    <td id="operator">{{ table.operator }}</td>
+                </tr>
+            {% endfor %}
+        </table>
+    </div>
+{% endblock %}

@@ -1,0 +1,97 @@
+{% extends 'basc2.html' %}
+{% block head %}
+    <link rel="stylesheet" href="/static/css/moredata.css">
+    <link href="//netdna.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+{% endblock %}
+{% block content %}
+    {#数据筛选框#}
+    <div class="search_">
+        <form class="form-inline" id="search_data" method="post" action="/delete_data_by_account_today_view/">
+            <div class="form-group">
+                <label for="exampleInputName2">付款账户:</label>
+                <select name="account" id="account" class="form-control" onchange="change_account()">
+                    {% for account in account_all_obj %}
+                        <option value="{{ account.account_name }}">{{ account.account_name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <input type="submit" value="查找" class="btn btn-default">
+            {% csrf_token %}
+        </form>
+    </div>
+    <br><br>
+    <hr>
+    {#显示数据#}
+    <div id="tabless">
+        <table class="table table-striped">
+            <tr>
+                <th>序号</th>
+                <th>店铺</th>
+                <th>QQ或微信</th>
+                <th>旺旺号</th>
+                <th>线上订单号</th>
+                <th>成交日期</th>
+                <th>付款类型</th>
+                <th>付款金额</th>
+                <th>付款账户</th>
+                <th>备注</th>
+                <th>创建时间</th>
+                <th>操作人</th>
+            </tr>
+            {% for table in tables %}
+                <tr id="{{ forloop.counter }}">
+                    <td id="num">{{ forloop.counter }}</td>
+                    <td>{{ table.shopname }}</td>
+                    <td>{{ table.qq_or_weixin }}</td>
+                    <td>{{ table.wang_wang_number }}</td>
+                    <td>{{ table.online_order_number }}</td>
+                    <td>{{ table.transaction_data }}</td>
+                    <td>{{ table.payment_type }}</td>
+                    <td>{{ table.payment_amount }}</td>
+                    <td>{{ table.payment_account.account_name }}</td>
+                    <td>{{ table.remarks }}</td>
+                    <td>{{ table.add_time }}</td>
+                    <td>{{ table.operator.username }}</td>
+                </tr>
+            {% endfor %}
+        </table>
+    </div>
+    <div class="col-lg-offset-9">
+        <h3> 共<span id="total_rows">{{ table_len }}</span>条数据
+            {% if method_ == 'post' and table_len > 0 %}
+                <button class="btn btn-danger" onclick="delete_data()">删除数据</button>
+            {% endif %}
+        </h3>
+    </div>
+{% endblock %}
+
+{% block js %}
+    {#付款账户默认选中#}
+    <script>
+        $("#account").find("option").each(function () {
+            var ff = '{{ account_post }}';
+            if ($(this).val() == ff) {
+                $(this).attr("selected", "selected");
+            }
+        });
+    </script>
+    {#删除数据#}
+    <script>
+        function delete_data() {
+            var account = $('#account').val();
+            $.ajax({
+                url: "/delete_data_by_account_today/",
+                type: "GET",
+                dataType: 'json',
+                data: {'account': account},
+                async: true,
+                success: function (msg) {
+                    alert(msg);
+                    window.location.reload()
+                }
+            })
+        }
+    </script>
+
+
+{% endblock %}

@@ -1,0 +1,275 @@
+{% extends 'basc2.html' %}
+{% block head %}
+    <link rel="stylesheet" href="/static/css/countmanagement.css">
+{% endblock %}
+{% block content %}
+    <h2>子账户记录管理</h2>
+    <hr>
+    {#添加数据#}
+    <form class="form-inline" id="add_data" method="post" ENCTYPE="multipart/form-data">
+        <div class="form-group">
+            <label for="exampleInputName2"><span style="color: red">*</span>&nbsp;&nbsp;&nbsp;账户名:</label>
+            <select name="account_name" id="account_name" class="form-control">
+                {% for acc in account %}
+                    <option value="{{ acc.account_name }}">{{ acc.account_name }}</option>
+                {% endfor %}
+            </select>
+        </div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <div class="form-group">
+            <label for="exampleInputName2"><span style="color: red">*</span>&nbsp;&nbsp;&nbsp;今日转账收入资金:</label>
+            {{ formm.start_money }}
+        </div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <div class="form-group">
+            <label for="exampleInputName2"><span style="color: red">*</span>&nbsp;&nbsp;&nbsp;结余资金:</label>
+            {{ formm.end_money }}
+        </div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <div class="form-group">
+            <label for="exampleInputName2"><span style="color: red">*</span>&nbsp;&nbsp;&nbsp;微信提现费用</label>
+            {{ formm.weixin_withdraw_money }}
+        </div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <br>
+        <br>
+        <div class="form-group">
+            <label for="exampleInputName2"><span style="color: red">*</span>&nbsp;&nbsp;&nbsp;转账收入截图:</label>
+            <input type="file" id="start_money_img" name="start_money_img">
+        </div>
+        <div class="form-group">
+            <label for="exampleInputName2"><span style="color: red">*</span>&nbsp;&nbsp;&nbsp;结余资金截图:</label>
+            <input type="file" id="end_money_img" name="end_money_img">
+        </div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <div class="form-group">
+            <label for="exampleInputName2">微信提现费用截图:</label>
+            <input type="file" id="weixin_img" name="weixin_img">
+        </div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <input type="submit" value="添加" class="btn btn-default">
+        {% csrf_token %}
+    </form>
+    <br>
+    <hr>
+    {#查询日期设置#}
+    <div class="col-lg-offset-7">
+        <form action="/search_count/" class="form-horizontal" id="search_form">
+            <div class="form-group">
+                <label for="inputEmail3" class="col-sm-3 control-label">日期</label>
+                <div class="col-sm-4">
+                    <input type="date" class="form-control" id="update_transaction_data" name="search_data" value="{{ nowss }}">
+                </div>
+                <input type="submit" value="查询" class="btn btn-default" onclick="search()">
+            </div>
+            {% csrf_token %}
+        </form>
+    </div>
+    {#    显示数据#}
+    <div id="tabless">
+        <table class="table table-striped">
+            <tr>
+                <th>序号</th>
+                <th>日期</th>
+                <th>账户名</th>
+                <th>初始资金</th>
+                <th>结余资金</th>
+                <th>微信提现费用</th>
+                <th>前一天的结余金额</th>
+                <th>转账收入截图</th>
+                <th>结余资金截图</th>
+                <th>微信提现费用截图</th>
+                <th>操作人</th>
+                <th>运营确认</th>
+                <th>操作</th>
+            </tr>
+            {% for table in count %}
+                <tr id="{{ forloop.counter }}">
+                    <td id="num">{{ forloop.counter }}</td>
+                    <td>{{ table.datess }}</td>
+                    <td>{{ table.account_name.account_name }}</td>
+                    <td>{{ table.start_money }}</td>
+                    <td>{{ table.end_money }}</td>
+                    <td>{{ table.weixin_withdraw_money }}</td>
+{#                    {% if  table.last_date_end_img != '前一日无截图' %}#}
+{#                        <td><a href="/media/{{ table.last_date_end_img }}" onclick="big_img('{{ table.last_date_end_img }}')"#}
+{#                               target="view_window"><img#}
+{#                                src="/media/{{ table.last_date_end_img }}"#}
+{#                                alt="" id="smar_img"></a></td>#}
+{#                    {% else %}#}
+{#                        <td>{{ table.last_date_end_img }}</td>#}
+{#                    {% endif %}#}
+                <td>{{ table.last_end_money }}</td>
+                    {% if  table.start_money_img %}
+                        <td><a href="/media/{{ table.start_money_img }}" onclick="big_img('{{ table.start_money_img }}')" target="view_window"><img
+                                src="/media/{{ table.start_money_img }}"
+                                alt="" id="smar_img"></a></td>
+                    {% else %}
+                        <td></td>
+                    {% endif %}
+                    {% if  table.end_money_img %}
+                        <td><a href="/media/{{ table.end_money_img }}" target="view_window"><img src="/media/{{ table.end_money_img }}" alt=""
+                                                                                                 id="smar_img"></a></td>
+                    {% else %}
+                        <td></td>
+                    {% endif %}
+                    {% if  table.weixin_img %}
+                        <td><a href="/media/{{ table.weixin_img }}" target="view_window"><img src="/media/{{ table.weixin_img }}" alt=""
+                                                                                              id="smar_img"></a></td>
+                    {% else %}
+                        <td></td>
+                    {% endif %}
+                    <td>{{ table.operator.username }}</td>
+                    {% if table.makes == 'False' %}
+                        <td><span class="glyphicon glyphicon-remove" style="color: red"></span></td>
+                    {% else %}
+                        <td><span class="glyphicon glyphicon-ok" style="color: green"></span></td>
+                    {% endif %}
+                    {% if  table.operator.username  == user %}
+                        <td><a class="glyphicon glyphicon-pencil" href="javascript:void(0);" onclick="edit_data({{ table.id }},this)" title="编辑"
+                               id="bsd"></a>
+                            <a class="glyphicon glyphicon-remove" href="javascript:void(0);" onclick="delete_data({{ table.id }},this)" title="删除"
+                               id="dele"></a>
+                        </td>
+                    {% else %}
+                        <td></td>
+                    {% endif %}
+                </tr>
+            {% endfor %}
+        </table>
+    </div>
+    {#修改数据的模态框#}
+    <div class="modal fade " tabindex="-1" role="dialog" id="edit_model">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="gridSystemModalLabel">修改账户记录</h4>
+                </div>
+                <div class="modal-body">
+                    <form class="form-horizontal" id="update_form" ENCTYPE="multipart/form-data" method="post" action="/edit_count/">
+                        <div class="form-group">
+                            <label for="inputEmail3" class="col-sm-3 control-label"><span style="color: red">*</span>&nbsp;&nbsp;&nbsp;账户名</label>
+                            <div class="col-sm-9">
+                                <input class="form-control" id="eidt_account_name" type="text" disabled>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="exampleInputName2" class="col-sm-3 control-label"><span
+                                    style="color: red">*</span>&nbsp;&nbsp;&nbsp;今日转账收入资金</label>
+                            <div class="col-sm-9">
+                                {{ edit_form.start_money }}
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="exampleInputName2" class="col-sm-3 control-label"><span
+                                    style="color: red">*</span>&nbsp;&nbsp;&nbsp;结余资金</label>
+                            <div class="col-sm-9">
+                                {{ edit_form.end_money }}
+                            </div>
+                            <input type="text" id="update_ids" value="" name="id">
+                        </div>
+                        <div class="form-group">
+                            <label for="exampleInputName2" class="col-sm-3 control-label"><span
+                                    style="color: red">*</span>&nbsp;&nbsp;&nbsp;微信提现费用</label>
+                            <div class="col-sm-9">
+                                {{ edit_form.weixin_withdraw_money }}
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="exampleInputName2" class="col-sm-3 control-label"><span
+                                    style="color: red">*</span>&nbsp;&nbsp;&nbsp;初始资金截图</label>
+                            <input type="file" id="eidt_start_money_img" name="start_money_img">
+                        </div>
+                        <div class="form-group">
+                            <label for="exampleInputName2" class="col-sm-3 control-label"><span
+                                    style="color: red">*</span>&nbsp;&nbsp;&nbsp;结余资金截图</label>
+                            <input type="file" id="eidt_end_money_img" name="end_money_img">
+                        </div>
+                        <div class="form-group">
+                            <label for="exampleInputName2" class="col-sm-3 control-label"><span style="color: red">*</span>&nbsp;&nbsp;&nbsp;微信提现费用截图</label>
+                            <input type="file" id="eidt_weixin_img" name="weixin_img">
+                        </div>
+                        <div class="form-group">
+                            <div class="col-sm-offset-9 col-sm-10">
+                                <button type="submit" class="btn btn-default">确认修改</button>
+                            </div>
+                        </div>
+                        {% csrf_token %}
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block js %}
+    <script>
+        $('#update_ids').hide();
+        $('#big_imgs').hide();
+    </script>
+    <script>
+        function big_img(img_url) {
+            $('#big_imgs').attr('src', '/media/' + img_url);
+            $('#big_img_model').show();
+        }
+    </script>
+    <script>
+        var err_exit = '{{ errs }}';
+        if (err_exit != '') {
+            alert(err_exit)
+        }
+    </script>
+    {#查询验证#}
+    <script>
+        function search() {
+            var update_transaction_data = $('#update_transaction_data').val()
+            if (update_transaction_data == '') {
+                alert('查询时间不能为空')
+                return
+            }
+            else {
+                $.ajax({
+                    url: "/search_count/",
+                    type: "GET",
+                    dataType: 'json',
+                    data: $('#search_form').serialize(),
+                    async: false,
+                })
+            }
+        }
+
+    </script>
+    {#修改数据#}
+    <script>
+        function edit_data(mm, sd) {
+            $.ajax({
+                url: "/edit_count/",
+                type: "GET",
+                dataType: 'json',
+                data: {'id': mm},
+                async: true,
+                success: function (arg) {
+                    $('#eidt_start_money').attr('value', arg['start_money']);
+                    $('#eidt_account_name').attr('value', arg['account_name']);
+                    $('#eidt_end_money').attr('value', arg['end_money']);
+                    $('#eidt_start_money_img').attr('value', arg['start_money_img']);
+                    $('#eidt_end_money_img').attr('value', arg['end_money_img']);
+                    $('#update_ids').attr('value', arg['ids']);
+                    $('#eidt_weixin_withdraw_money').attr('value', arg['weixin_withdraw_money']);
+                    $('#edit_model').modal('show');
+                }
+            })
+        }
+    </script>
+    {#删除数据#}
+    <script>
+        function delete_data(mm, sd) {
+            $.ajax({
+                url: "/deletes_count/",
+                type: "GET",
+                dataType: 'json',
+                data: {'id': mm},
+                async: false,
+                success: function () {
+                    console.log('OK')
+                }
+            });
+            window.location.replace("/countmanagement/")
+        }
+    </script>
+
+{% endblock %}

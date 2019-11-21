@@ -1,0 +1,97 @@
+
+* {
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background-color: #3d3d3d;
+}
+
+#left_nav {
+    float: left;
+    background-color: #3d3d3d;
+    width: 12%;
+    height: 100%;
+}
+
+#content {
+    float: left;
+    width: 88%;
+    height: 100%;
+    background-color: white;
+}
+
+#cont {
+    width: 1400px;
+    height: 770px;
+    margin: 20px 100px;
+}
+
+
+#nav {
+    background-color: #212121;
+    height: 50px;
+}
+
+#logo {
+    padding-top: 10px;
+    margin-left: 20px;
+    font-size: 1.5em;
+    color: #ffffff;
+}
+
+.menu {
+    padding-top: 15px;
+    text-align: left;
+
+    font-size: 1.3em;
+    color: white;
+}
+
+.menus {
+    padding-bottom: 5px;
+    text-align: center;
+    font-size: 1.3em;
+    color: white;
+    background-color: #2e3636;
+}
+
+.menus:hover {
+    background-color: #3c3d22;
+}
+
+a:hover {
+    text-decoration: none
+}
+
+hr#nav_hr {
+    width: 90%;
+    height: 1px;
+    background-color: #585858;
+    margin-bottom: -5px;
+    border: none;
+}
+
+hr {
+    width: 90%;
+    height: 1px;
+    background-color: #585858;
+    border: none;
+}
+
+#lights {
+    width: 25px;
+    height: 25px;
+}
+
+#remind {
+    padding-top: 5px;
+    height: 30px;
+}
+
+#admin_alert {
+    margin-top: 0;
+    font-size: 1.5rem;
+    font-family: 微软雅黑;
+}

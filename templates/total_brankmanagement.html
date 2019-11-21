@@ -1,0 +1,226 @@
+{% extends 'basc.html' %}
+{% block head %}
+<link rel="stylesheet" href="/static/css/total_brankmanagement.css">
+{% endblock %}
+
+{% block content %}
+    <h2>添加总账户</h2>
+    <hr>
+    <form class="form-horizontal" action="/total_brankmanagement/" method="post">
+        <div class="form-group">
+            <label for="inputEmail3" class="col-sm-2 control-label"><span style="color: red">*</span>&nbsp;&nbsp;&nbsp;总账户名</label>
+            <div class="col-sm-2 ">
+                {{ add_total_brank_form.total_brank_account_name }}
+                <span style="color: red" id="err"></span>
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="inputPassword3" class="col-sm-2 control-label"><span style="color: red">*</span>&nbsp;&nbsp;&nbsp;银行名</label>
+            <div class="col-sm-2">
+                {{ add_total_brank_form.brank_name }}
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="inputPassword3" class="col-sm-2 control-label"><span style="color: red">*</span>&nbsp;&nbsp;&nbsp;开户行号</label>
+            <div class="col-sm-2">
+                {{ add_total_brank_form.brank_number }}
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="inputEmail3" class="col-sm-2 control-label"><span style="color: red">*</span>&nbsp;&nbsp;&nbsp;银行卡号</label>
+            <div class="col-sm-2 ">
+                {{ add_total_brank_form.brank_card_number }}
+                <span style="color: red" id="err2"></span>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-sm-offset-2 col-sm-10">
+                <input type="submit" class="btn btn-default" value="创建" id="creates">
+            </div>
+        </div>
+        {% csrf_token %}
+    </form>
+    <hr>
+    {#搜索账户信息#}
+    <div class="col-lg-offset-8">
+        <form action="/total_brankmanagement/" class="form-horizontal">
+            <div class="form-group">
+                <label for="inputEmail3" class="col-sm-3 control-label">搜索账户信息</label>
+                <div class="col-sm-4">
+                    <input type="text" class="form-control" id="inputEmail3" placeholder="账户名" name="account_name">
+                </div>
+                <input type="submit" class="btn btn-default" value="查询">
+            </div>
+            {% csrf_token %}
+        </form>
+    </div>
+    {#展示数据#}
+    <div id="tabless">
+        <table class="table table-striped">
+            <tr>
+                <th>序号</th>
+                <th>总账户名</th>
+                <th>银行名</th>
+                <th>开户行号</th>
+                <th>银行卡号</th>
+                <th>绑定店铺</th>
+                <th>账户使用人</th>
+                <th>操作</th>
+            </tr>
+            {% for table in tables %}
+                <tr id="{{ forloop.counter }}">
+                    <td id="num">{{ forloop.counter }}</td>
+                    <td>{{ table.account_name }}</td>
+                    <td>{{ table.brank_name }}</td>
+                    <td>{{ table.brank_number }}</td>
+                    <td>{{ table.brank_card_number }}</td>
+                    <td>{{ table.shop_owner }}</td>
+                    <td>{{ table.owers }}</td>
+                    <td><a class="glyphicon glyphicon-pencil" href="javascript:void(0);" onclick="edit_data({{ table.id }},this)" title="编辑"
+                           id="bsd"></a>
+                        <a class="glyphicon glyphicon-remove" href="javascript:void(0);" onclick="delete_data({{ table.id }},this)" title="删除"
+                           id="dele"></a>
+                    </td>
+                </tr>
+            {% endfor %}
+        </table>
+    </div>
+
+    {#修改总账户的模态框#}
+    <div class="modal fade" tabindex="-1" role="dialog" id="edit_model">
+
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="gridSystemModalLabel">修改总账户信息</h4>
+                </div>
+                <div class="modal-body">
+                    <form class="form-horizontal" id="edit_data" method="post" action="/edit_total_brank/">
+                        <div class="form-group">
+                            <label for="inputEmail3" class="col-sm-3 control-label"><span style="color: red">*</span>&nbsp;&nbsp;&nbsp;总账户名：</label>
+                            <div class="col-sm-9">
+                                {{ edit_total_brank_form.total_brank_account_name }}
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="inputEmail3" class="col-sm-3 control-label"><span style="color: red">*</span>&nbsp;&nbsp;&nbsp;银行名：</label>
+                            <div class="col-sm-9">
+                                {{ edit_total_brank_form.brank_name }}
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="inputEmail3" class="col-sm-3 control-label"><span style="color: red">*</span>&nbsp;&nbsp;&nbsp;开户行号：</label>
+                            <div class="col-sm-9">
+                                {{ edit_total_brank_form.brank_number }}
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="inputEmail3" class="col-sm-3 control-label"><span style="color: red">*</span>&nbsp;&nbsp;&nbsp;银行卡号：</label>
+                            <div class="col-sm-9">
+                                {{ edit_total_brank_form.brank_card_number }}
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <input type="text" id="update_ids" value="" name="id">
+                        </div>
+                        <div class="form-group">
+                            <div class="col-sm-offset-9 col-sm-10">
+                                <button type="button" class="btn btn-default" id="creates" onclick="make_edit()">确认修改</button>
+                            </div>
+                        </div>
+                        {% csrf_token %}
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block js %}
+    {# 隐藏数据#}
+    <script>
+        $('#update_ids').hide()
+    </script>
+    <script>
+        if ('{{ msg }}' != '') {
+            alert(msg)
+        }
+    </script>
+    {#修改总账户#}
+    <script>
+        function edit_data(mm) {
+            $.ajax({
+                url: "/edit_total_brank/",
+                type: "GET",
+                dataType: 'json',
+                data: {'id': mm,},
+                async: true,
+                success: function (arg) {
+                    $('#edit_total_brank_account_name').attr('value', arg['total_account_name']);
+                    $('#edit_brank_name').attr('value', arg['total_brank_name']);
+                    $('#edit_brank_number').attr('value', arg['total_brank_num']);
+                    $('#edit_brank_card_number').attr('value', arg['total_brank_card_num']);
+                    $('#update_ids').attr('value', arg['ids']);
+                    $('#edit_model').modal('show');
+                }
+            })
+        }
+    </script>
+    {# 确定修改 #}
+    <script>
+        function make_edit() {
+            $.ajax({
+                url: "/edit_total_brank/",
+                type: "POST",
+                dataType: 'json',
+                data: $('#edit_data').serialize(),
+                async: false,
+                success: function (arg) {
+                    if (arg != '') {
+                        alert(arg)
+                    }
+                }
+            });
+            window.location.replace('/total_brankmanagement/');
+        }
+    </script>
+    {# 验证总账户名 #}
+    <script>
+        function verification_total_brank_account() {
+            var total_account_name = $('input#total_brank_account_name').val();
+            var total_brank_card_num = $('input#brank_card_number').val();
+            $.ajax({
+                url: "/verification_total_account/",
+                type: "GET",
+                dataType: 'json',
+                data: {'total_account_name': total_account_name, 'total_brank_card_num': total_brank_card_num},
+                async: false,
+                success: function (msg) {
+                    console.log(msg)
+                    $('#err').text(msg);
+                    if (msg == '该总账户名存在') {
+                        $('#creates').attr('type', 'button')
+                    }
+                    else {
+                        $('#creates').attr('type', 'submit')
+                    }
+                }
+            });
+        }
+    </script>
+    {#    删除总账户#}
+    <script>
+        function delete_data(mm) {
+            $.ajax({
+                url: "/del_total_brank/",
+                type: "GET",
+                dataType: 'json',
+                data: {'id': mm},
+                async: false,
+                success: function () {
+                }
+            });
+            window.location.replace("/total_brankmanagement/")
+        }
+    </script>
+{% endblock %}
