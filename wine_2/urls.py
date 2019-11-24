@@ -26,6 +26,4 @@ urlpatterns = [
                   path('search_total_count/', brush_views.search_total_count, name='search_total_count'),
                   path('search_total_count/', brush_views.search_total_count, name='search_total_count'),
                   path('search_total_count/', brush_views.search_total_count, name='search_total_count'),
-                  path('search_total_count/', brush_views.search_total_count, name='search_total_count'),
-
               ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
