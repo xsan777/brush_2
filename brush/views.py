@@ -124,14 +124,14 @@ def update_passwd(request):
 
 
 # 用户管理
-class Adduser(View):
+class Usermanagement(View):
     def get(self, request):
         user = request.session.get('username')
-        # rouse = request.session.get('rouse')
-        # if user == None:
-        #     return redirect(to=Login)
-        # if rouse == '运营':
-        #     return render(request, 'login.html', {'err_msg': '当前账户权限不足，请使用其他账号'})
+        rouse = request.session.get('rouse')
+        if user == None:
+            return redirect(to=Login)
+        if rouse == '运营':
+            return render(request, 'login.html', {'err_msg': '当前账户权限不足，请使用其他账号'})
         title = '用户管理'
         err_msg = ''
         msgs = ''

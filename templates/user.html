@@ -64,7 +64,7 @@
         <br>
         <br>
         <div class="col-lg-offset-10 ">
-            <button class="btn btn-default" id="creates" onclick="adduser()">创建</button>
+            <button type="button" class="btn btn-default" id="creates" onclick="adduser()">创建</button>
         </div>
         {% csrf_token %}
     </form>
@@ -215,7 +215,7 @@
     <script>
         function adduser() {
             $.ajax({
-                url: "{% url 'adduser' %}",
+                url: "{% url 'usermanagement' %}",
                 type: "POST",
                 dataType: "json",
                 data: $('form#adduser').serialize(),
