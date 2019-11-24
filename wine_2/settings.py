@@ -78,7 +78,7 @@ WSGI_APPLICATION = 'wine_2.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'brush_wine',
+        # 'NAME': 'brush_wine',
         'NAME': 'brush_2',
         'USER': 'root',
         'PASSWORD': '123456',

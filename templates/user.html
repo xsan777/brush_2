@@ -5,7 +5,7 @@
 {% block content %}
     <h2>添加用户</h2>
     <hr>
-    <form class="form-inline" action="/adduser/" method="post">
+    <form class="form-inline" method="post" id="adduser">
         <div class="form-group">
             <label for="inputEmail3"><span style="color: red">*</span>&nbsp;&nbsp;&nbsp;用户名</label>&nbsp;&nbsp;
             {{ add_form.username }}
@@ -64,7 +64,7 @@
         <br>
         <br>
         <div class="col-lg-offset-10 ">
-            <input type="submit" class="btn btn-default" value="创建" id="creates">
+            <button class="btn btn-default" id="creates" onclick="adduser()">创建</button>
         </div>
         {% csrf_token %}
     </form>
@@ -130,19 +130,22 @@
                             </div>
                         </div>
                         <div class="form-group">
-                            <label for="exampleInputName2" class="col-sm-3 control-label"><span style="color: red">*</span>&nbsp;&nbsp;&nbsp;密码</label>
+                            <label for="exampleInputName2" class="col-sm-3 control-label"><span
+                                    style="color: red">*</span>&nbsp;&nbsp;&nbsp;密码</label>
                             <div class="col-sm-9">
                                 {{ edit_user.passwd }}
                             </div>
                         </div>
                         <div class="form-group">
-                            <label for="exampleInputName2" class="col-sm-3 control-label"><span style="color: red">*</span>&nbsp;&nbsp;&nbsp;确认密码</label>
+                            <label for="exampleInputName2" class="col-sm-3 control-label"><span
+                                    style="color: red">*</span>&nbsp;&nbsp;&nbsp;确认密码</label>
                             <div class="col-sm-9">
                                 {{ edit_user.passwd2 }}
                             </div>
                         </div>
                         <div class="form-group">
-                            <label for="exampleInputName2" class="col-sm-3 control-label"><span style="color: red">*</span>&nbsp;&nbsp;&nbsp;角色</label>
+                            <label for="exampleInputName2" class="col-sm-3 control-label"><span
+                                    style="color: red">*</span>&nbsp;&nbsp;&nbsp;角色</label>
                             <div class="col-sm-9">
                                 <select name="rose" id="edit_rose" class="form-control" onchange="edit_cheage_rouse()">
                                     <option value="运营">运营</option>
@@ -152,13 +155,15 @@
                             <input type="text" id="update_ids" value="" name="update_ids">
                         </div>
                         <div class="form-group">
-                            <label for="exampleInputName2" class="col-sm-3 control-label"><span style="color: red">*</span>&nbsp;&nbsp;&nbsp;职位描述</label>
+                            <label for="exampleInputName2" class="col-sm-3 control-label"><span
+                                    style="color: red">*</span>&nbsp;&nbsp;&nbsp;职位描述</label>
                             <div class="col-sm-9">
                                 {{ edit_user.description }}
                             </div>
                         </div>
                         <div class="form-group">
-                            <label for="exampleInputName2" class="col-sm-3 control-label"><span style="color: red">*</span>&nbsp;&nbsp;&nbsp;店铺</label>
+                            <label for="exampleInputName2" class="col-sm-3 control-label"><span
+                                    style="color: red">*</span>&nbsp;&nbsp;&nbsp;店铺</label>
                             <div class="col-sm-9">
                                 <div class=" checkbox">
                                     <label class="checkbox-inline">
@@ -173,7 +178,8 @@
                                 </div>
                             </div>
                             <div class="form-group">
-                                <label for="inputPassword3" class="col-sm-3 control-label"><span style="color: red">*</span>&nbsp;&nbsp;&nbsp;总账户选择</label>
+                                <label for="inputPassword3" class="col-sm-3 control-label"><span
+                                        style="color: red">*</span>&nbsp;&nbsp;&nbsp;总账户选择</label>
                                 <div class="col-sm-9">
                                     <div class="checkbox ">
                                         <label class="checkbox-inline">
@@ -206,6 +212,20 @@
     <script>
         $('#update_ids').hide();
     </script>
+    <script>
+        function adduser() {
+            $.ajax({
+                url: "{% url 'adduser' %}",
+                type: "POST",
+                dataType: "json",
+                data: $('form#adduser').serialize(),
+                async: true,
+                success: function (msg) {
+                    alert(msg)
+                }
+            })
+        }
+    </script>
     {#角色为财务时店铺默认全选并禁止改动#}
     <script>
         function cheage_rouse() {
@@ -219,8 +239,7 @@
                     $(this).prop("checked", true);
                     $(this).prop("disabled", true);
                 });
-            }
-            else {
+            } else {
                 $("input[id=inlineCheckbox1]:checkbox").each(function () {
                     $(this).prop("checked", false);
                     $(this).prop("disabled", false);
@@ -255,8 +274,7 @@
                     $('#err').text(msg);
                     if (msg == '用户名已存在') {
                         $('#creates').attr('type', 'button');
-                    }
-                    else {
+                    } else {
                         $('#creates').attr('type', 'submit');
                     }
                 }
@@ -341,7 +359,6 @@
         });
 
     </script>
-
     {#    修改数据选择总账户#}
     <script>
         //实现全选与反选
@@ -398,8 +415,7 @@
                     $(this).prop("checked", true);
                     $(this).prop("disabled", true);
                 });
-            }
-            else {
+            } else {
                 $("input[id=inlineCheckbox12]:checkbox").each(function () {
                     $(this).prop("checked", false);
                     $(this).prop("disabled", false);
@@ -423,8 +439,7 @@
                 success: function (arr) {
                     if (arr['err'] != '') {
                         alert(arr['err']);
-                    }
-                    else {
+                    } else {
                         window.location.replace('/usermanagement/');
                     }
                 }

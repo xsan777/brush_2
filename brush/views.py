@@ -122,6 +122,120 @@ def update_passwd(request):
             msg = json.dumps(msg)
         return HttpResponse(msg)
 
+
+# 用户管理
+class Adduser(View):
+    def get(self, request):
+        user = request.session.get('username')
+        # rouse = request.session.get('rouse')
+        # if user == None:
+        #     return redirect(to=Login)
+        # if rouse == '运营':
+        #     return render(request, 'login.html', {'err_msg': '当前账户权限不足，请使用其他账号'})
+        title = '用户管理'
+        err_msg = ''
+        msgs = ''
+        users = request.GET.get('username')
+        if users:
+            user_id = Userinfo.objects.filter(username=users, deletes=False).all()
+        else:
+            user_id = Userinfo.objects.filter(deletes=False).all()
+        table_list = []
+        for i in user_id:
+            tables = {}
+            tables['id'] = i.id
+            tables['username'] = i.username
+            tables['rouse'] = i.rouse
+            tables['description'] = i.description
+            shops = ''
+            if i.rouse == '财务':
+                shops = '所有店铺'
+            else:
+                for user_shop in i.shop.filter(deletes=False).all():
+                    shops += str(user_shop)
+                    shops += '、'
+            tables['shop'] = shops
+            total_accounts = ''
+            if i.rouse == '财务':
+                total_accounts = '所有总账户'
+            else:
+                for user_total_accounts in i.total_brank_account.filter(deletes=False).all():
+                    total_accounts += str(user_total_accounts.total_account_name)
+                    total_accounts += '、'
+            tables['total_accounts'] = total_accounts
+            table_list.append(tables)
+        shopss = Shops.objects.filter(deletes=False).all()
+        total_account = Total_brank_account.objects.filter(deletes=False).all()
+        add_form = Add_user()
+        edit_form = Edit_user()
+        now_time = time.strftime('%Y-%m-%d', time.localtime())
+        now_time = get_nday_list2(2, now_time)
+        all_account_makes = Total_account_record.objects.filter(datess__date=now_time, makes=False, deletes=False).all()
+        if len(all_account_makes) == 0:
+            admin_flog = 1
+        else:
+            admin_flog = 0
+        update_passwd = Updata_passwd()
+        return render(request, 'user.html',
+                      {'title': title, 'tables': table_list, 'shops': shopss, 'add_form': add_form, 'edit_user': edit_form, 'err_msg': err_msg,
+                       'msgs': msgs, 'user': user, 'admin_flog': admin_flog, 'total_account': total_account, 'update_passwd': update_passwd})
+
+    def post(self, request):
+        user = request.session.get('username')
+        rouse = request.session.get('rouse')
+        usernames = request.POST.get('username')
+        passwds = request.POST.get('passwd')
+        passwd2s = request.POST.get('passwd2')
+        rouses = request.POST.get('rose')
+        descriptions = request.POST.get('description')
+        shop_list = request.POST.getlist('checkitem')
+        total_accounts_list = request.POST.getlist('total_accounts')
+        # 财务角色自动绑定所有店铺和所有总账户
+        if rouses == '财务':
+            shop_all = Shops.objects.filter(deletes=False).all()
+            shop_list = []
+            for j in shop_all:
+                shop_list.append(j.shopname)
+            total_account_all = Total_brank_account.objects.filter(deletes=False).all()
+            total_accounts_list = []
+            for m in total_account_all:
+                total_accounts_list.append(m.total_account_name)
+        if passwd2s == passwds:
+            if len(shop_list) != 0:
+                if len(total_accounts_list) != 0:
+                    Userinfo.objects.create(username=usernames, passwd=passwds, rouse=rouses, description=descriptions, deletes=False)
+                    user_ids = Userinfo.objects.filter(username=usernames, deletes=False).get()
+                    # 将店铺与用户绑定
+                    for shop in shop_list:
+                        user_ids.shop.add(Shops.objects.get(shopname=shop, deletes=False))
+                    # 将总账户与用户绑定
+                    for accounts in total_accounts_list:
+                        user_ids.total_brank_account.add(Total_brank_account.objects.get(total_account_name=accounts, deletes=False))
+                    last_date = Userinfo.objects.last()
+                    shops_clean = last_date.shop.all()
+                    shops = ''
+                    for user_shop in shops_clean:
+                        shops += str(user_shop)
+                        shops += '、'
+                    total_account_names = ''
+                    for total in total_accounts_list:
+                        total_account_names += total
+                        total_account_names += '、'
+                    operators = Userinfo.objects.get(username=user, deletes=False)
+                    operation_types = '创建新用户'
+                    after_operations = '{id：%d，用户名：%s，密码：%s，角色：%s，职位描述：%s，所管店铺：%s，使用总账户：%s}' % (
+                        last_date.id, usernames, passwds, rouse, descriptions, shops, total_account_names)
+                    Log.objects.create(operator=operators, operation_type=operation_types, after_operation=after_operations)
+                    msgs = "创建成功"
+                else:
+                    msgs = '必须选择总账户'
+            else:
+                msgs = '必须选择店铺'
+        else:
+            msgs = '两次密码输入不一致'
+        return HttpResponse(json.dumps(msgs))
+
+
 # 查看运营账户未确认情况
 def check_child_count_status(user):
     # 总账户未确认提示运营

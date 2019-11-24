@@ -21,5 +21,7 @@ from django.conf import settings
 
 urlpatterns = [
                   path('admin/', admin.site.urls),
-                  path('', brush_views.Login.as_view(), name='login')
+                  path('', brush_views.Login.as_view(), name='login'),
+                  path('adduser/', brush_views.Adduser.as_view(), name='adduser'),
+                  path('search_total_count/', brush_views.search_total_count, name='search_total_count')
               ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
