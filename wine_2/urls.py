@@ -23,5 +23,9 @@ urlpatterns = [
                   path('admin/', admin.site.urls),
                   path('', brush_views.Login.as_view(), name='login'),
                   path('usermanagement/', brush_views.Usermanagement.as_view(), name='usermanagement'),
-                  path('search_total_count/', brush_views.search_total_count, name='search_total_count')
+                  path('search_total_count/', brush_views.search_total_count, name='search_total_count'),
+                  path('search_total_count/', brush_views.search_total_count, name='search_total_count'),
+                  path('search_total_count/', brush_views.search_total_count, name='search_total_count'),
+                  path('search_total_count/', brush_views.search_total_count, name='search_total_count'),
+
               ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
