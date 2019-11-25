@@ -236,6 +236,197 @@ class Usermanagement(View):
         return HttpResponse(json.dumps(msgs))
 
 
+# 用户名验证
+def verification_username(request):
+    usernames = request.GET.get('username')
+    user_exist = Userinfo.objects.filter(username=usernames, deletes=False).all()
+    if user_exist:
+        msg = json.dumps('用户名已存在')
+    else:
+        msg = json.dumps('')
+    return HttpResponse(msg)
+
+
+# 搜索用户信息
+def search_ueser(request):
+    title = '用户管理'
+    users = request.GET.get('username')
+    tables = Userinfo.objects.filter(username__contains=users, deletes=False).all()
+    shopss = Shops.objects.filter(deletes=False).all()
+    add_form = Add_user()
+    edit_form = Edit_user()
+    return render(request, 'user.html', locals())
+
+
+# 编辑用户信息
+class Edit_user(View):
+    def get(self, request):
+        user = request.session.get('username')
+        rouse = request.session.get('rouse')
+        if user == None:
+            return redirect(to=Login)
+        if rouse == '运营':
+            return render(request, 'login.html', {'err_msg': '当前账户权限不足，请使用其他账号'})
+        ids = request.GET.get('id')
+        current_data = Userinfo.objects.filter(id=ids).get()
+        msg = json.dumps(
+            {'rose': current_data.rouse, 'username': current_data.username, 'passwd': current_data.passwd, 'description': current_data.description,
+             'ids': current_data.id,})
+        return HttpResponse(msg)
+
+    def post(self,request):
+        user = request.session.get('username')
+        rouse = request.session.get('rouse')
+        ids = request.POST.get('update_ids')
+        passwds = request.POST.get('passwd')
+        passwd2s = request.POST.get('passwd2')
+        rouses = request.POST.get('rose')
+        descriptions = request.POST.get('description')
+        shop_list = request.POST.getlist('checkitem')
+        total_brank_account_list = request.POST.getlist('edit_total_brank_accounts')
+        if rouses == '财务':
+            shop_all = Shops.objects.filter(deletes=False).all()
+            shop_list = []
+            for j in shop_all:
+                shop_list.append(j.shopname)
+            total_accounts = Total_brank_account.objects.filter(deletes=False).all()
+            total_brank_account_list = []
+            for m in total_accounts:
+                total_brank_account_list.append(m.total_account_name)
+        if passwd2s == passwds:
+            if len(shop_list) != 0:
+                if len(total_brank_account_list) != 0:
+                    user_id = Userinfo.objects.get(id=ids)
+                    usernames = user_id.username
+                    shops_clean = user_id.shop.filter(deletes=False).all()
+                    before_shops = ''
+                    for user_shop in shops_clean:
+                        before_shops += str(user_shop)
+                        before_shops += '、'
+                    before_total_account = user_id.total_brank_account.filter(deletes=False).all()
+                    before_total_accounts = ''
+                    for total_account in before_total_account:
+                        before_total_accounts += str(total_account.total_account_name)
+                        before_total_accounts += '、'
+                    Userinfo.objects.filter(id=ids).update(username=usernames, passwd=passwds, rouse=rouses, description=descriptions,
+                                                           deletes=False)
+                    # 将用户与店铺绑定
+                    user_id.shop.clear()
+                    for shop in shop_list:
+                        user_id.shop.add(Shops.objects.get(shopname=shop, deletes=False))
+                    # 将用户与总账户绑定
+                    user_id.total_brank_account.clear()
+                    for total_brank_account in total_brank_account_list:
+                        user_id.total_brank_account.add(Total_brank_account.objects.get(total_account_name=total_brank_account, deletes=False))
+
+                    update_date = Userinfo.objects.get(id=ids)
+                    shops_clean = update_date.shop.filter(deletes=False).all()
+                    shops = ''
+                    for user_shop in shops_clean:
+                        shops += str(user_shop)
+                        shops += '、'
+
+                    after_total_account = update_date.total_brank_account.filter(deletes=False).all()
+                    after_total_accounts = ''
+                    for total_account in after_total_account:
+                        after_total_accounts += str(total_account.total_account_name)
+                        after_total_accounts += '、'
+                    operators = Userinfo.objects.get(username=user, deletes=False)
+                    operation_types = '修改用户信息'
+                    before_operations = '{id：%d，用户名：%s，密码：%s，角色：%s，职位描述：%s，所管店铺：%s，使用的总账户：%s}' % (
+                        user_id.id, user_id.username, user_id.passwd, user_id.rouse, user_id.description, before_shops, before_total_accounts)
+                    after_operations = '{id：%s，用户名：%s，密码：%s，角色：%s，职位描述：%s，所管店铺：%s，使用的总账户：%s}' % (
+                        ids, usernames, passwds, rouse, descriptions, shops, after_total_accounts)
+                    Log.objects.create(operator=operators, operation_type=operation_types, after_operation=after_operations,
+                                       before_operation=before_operations)
+                else:
+                    err_msg = '必须选择总账户'
+            else:
+                err_msg = '必须选择店铺'
+
+
+def edit_user(request):
+    user = request.session.get('username')
+    rouse = request.session.get('rouse')
+    if user == None:
+        return redirect(to=Login)
+    if rouse == '运营':
+        return render(request, 'login.html', {'err_msg': '当前账户权限不足，请使用其他账号'})
+    ids = request.GET.get('id')
+    err_msg = ''
+    if request.method == 'POST':
+        ids = request.POST.get('update_ids')
+        passwds = request.POST.get('passwd')
+        passwd2s = request.POST.get('passwd2')
+        rouses = request.POST.get('rose')
+        descriptions = request.POST.get('description')
+        shop_list = request.POST.getlist('checkitem')
+        total_brank_account_list = request.POST.getlist('edit_total_brank_accounts')
+        if rouses == '财务':
+            shop_all = Shops.objects.filter(deletes=False).all()
+            shop_list = []
+            for j in shop_all:
+                shop_list.append(j.shopname)
+            total_accounts = Total_brank_account.objects.filter(deletes=False).all()
+            total_brank_account_list = []
+            for m in total_accounts:
+                total_brank_account_list.append(m.total_account_name)
+        if passwd2s == passwds:
+            if len(shop_list) != 0:
+                if len(total_brank_account_list) != 0:
+                    user_id = Userinfo.objects.get(id=ids)
+                    usernames = user_id.username
+                    shops_clean = user_id.shop.filter(deletes=False).all()
+                    before_shops = ''
+                    for user_shop in shops_clean:
+                        before_shops += str(user_shop)
+                        before_shops += '、'
+                    before_total_account = user_id.total_brank_account.filter(deletes=False).all()
+                    before_total_accounts = ''
+                    for total_account in before_total_account:
+                        before_total_accounts += str(total_account.total_account_name)
+                        before_total_accounts += '、'
+                    Userinfo.objects.filter(id=ids).update(username=usernames, passwd=passwds, rouse=rouses, description=descriptions, deletes=False)
+                    # 将用户与店铺绑定
+                    user_id.shop.clear()
+                    for shop in shop_list:
+                        user_id.shop.add(Shops.objects.get(shopname=shop, deletes=False))
+                    # 将用户与总账户绑定
+                    user_id.total_brank_account.clear()
+                    for total_brank_account in total_brank_account_list:
+                        user_id.total_brank_account.add(Total_brank_account.objects.get(total_account_name=total_brank_account, deletes=False))
+
+                    update_date = Userinfo.objects.get(id=ids)
+                    shops_clean = update_date.shop.filter(deletes=False).all()
+                    shops = ''
+                    for user_shop in shops_clean:
+                        shops += str(user_shop)
+                        shops += '、'
+
+                    after_total_account = update_date.total_brank_account.filter(deletes=False).all()
+                    after_total_accounts = ''
+                    for total_account in after_total_account:
+                        after_total_accounts += str(total_account.total_account_name)
+                        after_total_accounts += '、'
+                    operators = Userinfo.objects.get(username=user, deletes=False)
+                    operation_types = '修改用户信息'
+                    before_operations = '{id：%d，用户名：%s，密码：%s，角色：%s，职位描述：%s，所管店铺：%s，使用的总账户：%s}' % (
+                        user_id.id, user_id.username, user_id.passwd, user_id.rouse, user_id.description, before_shops, before_total_accounts)
+                    after_operations = '{id：%s，用户名：%s，密码：%s，角色：%s，职位描述：%s，所管店铺：%s，使用的总账户：%s}' % (
+                        ids, usernames, passwds, rouse, descriptions, shops, after_total_accounts)
+                    Log.objects.create(operator=operators, operation_type=operation_types, after_operation=after_operations,
+                                       before_operation=before_operations)
+                else:
+                    err_msg = '必须选择总账户'
+            else:
+                err_msg = '必须选择店铺'
+    current_data = Userinfo.objects.filter(id=ids).get()
+    msg = json.dumps(
+        {'rose': current_data.rouse, 'username': current_data.username, 'passwd': current_data.passwd, 'description': current_data.description,
+         'ids': current_data.id, 'err': err_msg, })
+    return HttpResponse(msg)
+
+
 # 查看运营账户未确认情况
 def check_child_count_status(user):
     # 总账户未确认提示运营

@@ -23,5 +23,8 @@ urlpatterns = [
                   path('admin/', admin.site.urls),
                   path('', brush_views.Login.as_view(), name='login'),
                   path('usermanagement/', brush_views.Usermanagement.as_view(), name='usermanagement'),
+                  path('edit_user/', brush_views.Edit_user.as_view(), name='edit_user'),
                   path('search_total_count/', brush_views.search_total_count, name='search_total_count'),
+                  path('verification_username/', brush_views.verification_username, name='verification_username'),
+                  path('search_ueser/', brush_views.search_ueser, name='search_ueser'),
               ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

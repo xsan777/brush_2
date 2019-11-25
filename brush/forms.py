@@ -46,7 +46,7 @@ class Add_user(forms.Form):
 
     def clean_username(self):
         v = self.cleaned_data['username']
-        if Userinfo.objects.filter(username=v):
+        if Userinfo.objects.filter(username=v).exists():
             raise ValidationError("用户名已存在")
         return v
 
