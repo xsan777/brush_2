@@ -36,11 +36,11 @@
             <label for="inputPassword3"><span style="color: red">*</span>&nbsp;&nbsp;&nbsp;店铺选择</label>
             <div class="checkbox col-sm-12 ">
                 <label class="checkbox-inline">
-                    <input type="checkbox" id="inlineCheckbox1" class="allAndNotAll" value="all">全选
+                    <input type="checkbox" id="all_not_all_shop" class="inlineCheckbox_shop" value="all">全选
                 </label>
                 {% for shop in shops %}
                     <label class="checkbox-inline ">
-                        <input type="checkbox" id="inlineCheckbox1" value="{{ shop.shopname }}" name="checkitem"> {{ shop.shopname }}
+                        <input type="checkbox" class="inlineCheckbox_shop" value="{{ shop.shopname }}" name="checkitem"> {{ shop.shopname }}
                     </label>
                 {% endfor %}
             </div>
@@ -51,11 +51,11 @@
             <label for="inputPassword3"><span style="color: red">*</span>&nbsp;&nbsp;&nbsp;总账户选择</label>
             <div class="checkbox col-sm-12 ">
                 <label class="checkbox-inline">
-                    <input type="checkbox" id="inlineCheckbox3" class="allAndNotAll3" value="all">全选
+                    <input type="checkbox" class="inlineCheckbox_total_account" id="all_not_all_total_account" value="all">全选
                 </label>
                 {% for accounts in total_account %}
                     <label class="checkbox-inline ">
-                        <input type="checkbox" id="inlineCheckbox3" value="{{ accounts.total_account_name }}"
+                        <input type="checkbox" class="inlineCheckbox_total_account" value="{{ accounts.total_account_name }}"
                                name="total_accounts"> {{ accounts.total_account_name }}
                     </label>
                 {% endfor %}
@@ -167,11 +167,11 @@
                             <div class="col-sm-9">
                                 <div class=" checkbox">
                                     <label class="checkbox-inline">
-                                        <input type="checkbox" id="inlineCheckbox12" class="allAndNotAll2" value="all">全选
+                                        <input type="checkbox" class="inlineCheckbox_edit_shop" id="all_not_all_edit_shop" value="all">全选
                                     </label>
                                     {% for shop in shops %}
                                         <label class="checkbox-inline">
-                                            <input type="checkbox" id="inlineCheckbox12" value="{{ shop.shopname }}"
+                                            <input type="checkbox" class="inlineCheckbox_edit_shop" value="{{ shop.shopname }}"
                                                    name="checkitem"> {{ shop.shopname }}
                                         </label>
                                     {% endfor %}
@@ -183,11 +183,13 @@
                                 <div class="col-sm-9">
                                     <div class="checkbox ">
                                         <label class="checkbox-inline">
-                                            <input type="checkbox" id="inlineCheckbox4" class="allAndNotAll4" value="all">全选
+                                            <input type="checkbox" class="inlineCheckbox_edit_total_account" id="all_not_all_edit_total_account"
+                                                   value="all">全选
                                         </label>
                                         {% for accounts in total_account %}
                                             <label class="checkbox-inline ">
-                                                <input type="checkbox" id="inlineCheckbox4" value="{{ accounts.total_account_name }}"
+                                                <input type="checkbox" class="inlineCheckbox_edit_total_account"
+                                                       value="{{ accounts.total_account_name }}"
                                                        name="edit_total_brank_accounts"> {{ accounts.total_account_name }}
                                             </label>
                                         {% endfor %}
@@ -231,20 +233,20 @@
         function cheage_rouse() {
             var roues = $("#rose option:selected").val();
             if (roues == '财务') {
-                $("input[id=inlineCheckbox1]:checkbox").each(function () {
+                $("input[class=inlineCheckbox_shop]:checkbox").each(function () {
                     $(this).prop("checked", true);
                     $(this).prop("disabled", true);
                 });
-                $("input[id=inlineCheckbox3]:checkbox").each(function () {
+                $("input[class=inlineCheckbox_total_account]:checkbox").each(function () {
                     $(this).prop("checked", true);
                     $(this).prop("disabled", true);
                 });
             } else {
-                $("input[id=inlineCheckbox1]:checkbox").each(function () {
+                $("input[class=inlineCheckbox_total_account]:checkbox").each(function () {
                     $(this).prop("checked", false);
                     $(this).prop("disabled", false);
                 });
-                $("input[id=inlineCheckbox3]:checkbox").each(function () {
+                $("input[class=inlineCheckbox_shop]:checkbox").each(function () {
                     $(this).prop("checked", false);
                     $(this).prop("disabled", false);
                 });
@@ -301,93 +303,118 @@
     {#选择店铺#}
     <script>
         //实现全选与反选
-        $(".allAndNotAll").click(function () {
+        $("#all_not_all_shop").click(function () {
             if ($(this).prop("checked")) {
-                $("input[id=inlineCheckbox1]:checkbox").each(function () {
+                $("input[class=inlineCheckbox_shop]:checkbox").each(function () {
                     $(this).prop("checked", true);
                 });
             } else {
-                $("input[id=inlineCheckbox1]:checkbox").each(function () {
+                $("input[class=inlineCheckbox_shop]:checkbox").each(function () {
                     $(this).prop("checked", false);
                 });
             }
         });
         //当其中不勾选某一个选项的时候,则去掉全选复选框
         $(":checkbox[name=checkitem]").click(function () {
-            $(".allAndNotAll").prop('checked',
-                $(":checkbox[id=inlineCheckbox1]").length == $(":checkbox[id=inlineCheckbox1]:checked").length);
+            $("#all_not_all_shop").prop('checked',
+                $(":checkbox[class=inlineCheckbox_shop]").length == $(":checkbox[class=inlineCheckbox_shop]:checked").length);
         });
     </script>
     {#选择总账户#}
     <script>
         //实现全选与反选
-        $(".allAndNotAll3").click(function () {
+        $("#all_not_all_total_account").click(function () {
             if ($(this).prop("checked")) {
-                $("input[id=inlineCheckbox3]:checkbox").each(function () {
+                $("input[class=inlineCheckbox_total_account]:checkbox").each(function () {
                     $(this).prop("checked", true);
                 });
             } else {
-                $("input[id=inlineCheckbox3]:checkbox").each(function () {
+                $("input[class=inlineCheckbox_total_account]:checkbox").each(function () {
                     $(this).prop("checked", false);
                 });
             }
         });
         //当其中不勾选某一个选项的时候,则去掉全选复选框
         $(":checkbox[name=total_accounts]").click(function () {
-            $(".allAndNotAll3").prop('checked',
-                $(":checkbox[id=inlineCheckbox3]").length == $(":checkbox[id=inlineCheckbox3]:checked").length);
+            $("#all_not_all_total_account").prop('checked',
+                $(":checkbox[class=inlineCheckbox_total_account]").length == $(":checkbox[class=inlineCheckbox_total_account]:checked").length);
         });
     </script>
     {#    修改数据选择店铺#}
     <script>
         //实现全选与反选
-        $(".allAndNotAll2").click(function () {
+        $("#all_not_all_edit_shop").click(function () {
             if ($(this).prop("checked")) {
-                $("input[id=inlineCheckbox12]:checkbox").each(function () {
+                $("input[class=inlineCheckbox_edit_shop]:checkbox").each(function () {
                     $(this).prop("checked", true);
                 });
             } else {
-                $("input[id=inlineCheckbox12]:checkbox").each(function () {
+                $("input[class=inlineCheckbox_edit_shop]:checkbox").each(function () {
                     $(this).prop("checked", false);
                 });
             }
         });
         //当其中不勾选某一个选项的时候,则去掉全选复选框
         $(":checkbox[name=checkitem]").click(function () {
-            $(".allAndNotAll2").prop('checked',
-                $(":checkbox[id=inlineCheckbox12]").length == $(":checkbox[id=inlineCheckbox12]:checked").length);
+            $("#all_not_all_edit_shop").prop('checked',
+                $(":checkbox[class=inlineCheckbox_edit_shop]").length == $(":checkbox[class=inlineCheckbox_edit_shop]:checked").length);
         });
 
     </script>
     {#    修改数据选择总账户#}
     <script>
         //实现全选与反选
-        $(".allAndNotAll4").click(function () {
+        $("#all_not_all_edit_total_account").click(function () {
             if ($(this).prop("checked")) {
-                $("input[id=inlineCheckbox4]:checkbox").each(function () {
+                $("input[class=inlineCheckbox_edit_total_account]:checkbox").each(function () {
                     $(this).prop("checked", true);
                 });
             } else {
-                $("input[id=inlineCheckbox4]:checkbox").each(function () {
+                $("input[class=inlineCheckbox_edit_total_account]:checkbox").each(function () {
                     $(this).prop("checked", false);
                 });
             }
         });
         //当其中不勾选某一个选项的时候,则去掉全选复选框
         $(":checkbox[name=edit_total_brank_accounts]").click(function () {
-            $(".allAndNotAll4").prop('checked',
-                $(":checkbox[id=inlineCheckbox4]").length == $(":checkbox[id=inlineCheckbox4]:checked").length);
+            $("#all_not_all_edit_total_account").prop('checked',
+                $(":checkbox[class=inlineCheckbox_edit_total_account]").length == $(":checkbox[class=inlineCheckbox_edit_total_account]:checked").length);
         });
+    </script>
+    {#修改数据选择角色为财务时店铺默认全选并禁止改动#}
+    <script>
+        function edit_cheage_rouse() {
+            var roues = $("#edit_rose option:selected").val();
+            if (roues == '财务') {
+                $("input[class=inlineCheckbox_edit_total_account]:checkbox").each(function () {
+                    $(this).prop("checked", true);
+                    $(this).prop("disabled", true);
+                });
+                $("input[class=inlineCheckbox_edit_shop]:checkbox").each(function () {
+                    $(this).prop("checked", true);
+                    $(this).prop("disabled", true);
+                });
+            } else {
+                $("input[class=inlineCheckbox_edit_total_account]:checkbox").each(function () {
+                    $(this).prop("checked", false);
+                    $(this).prop("disabled", false);
+                });
+                $("input[class=inlineCheckbox_edit_shop]:checkbox").each(function () {
+                    $(this).prop("checked", false);
+                    $(this).prop("disabled", false);
+                });
+            }
+        }
     </script>
     {#修改数据#}
     <script>
-        function edit_data(mm, sd) {
+        function edit_data(mm) {
             $.ajax({
-                url: "/edit_user/",
+                url: "{% url 'edit_user' %}",
                 type: "GET",
                 dataType: 'json',
                 data: {'id': mm},
-                async: true,
+                async: false,
                 success: function (arg) {
                     $("#rose").find("option").each(function () {
                         if ($(this).val() == arg['rose']) {
@@ -404,28 +431,7 @@
             })
         }
 
-        function edit_cheage_rouse() {
-            var roues = $("#edit_rose option:selected").val();
-            if (roues == '财务') {
-                $("input[id=inlineCheckbox12]:checkbox").each(function () {
-                    $(this).prop("checked", true);
-                    $(this).prop("disabled", true);
-                });
-                $("input[id=inlineCheckbox4]:checkbox").each(function () {
-                    $(this).prop("checked", true);
-                    $(this).prop("disabled", true);
-                });
-            } else {
-                $("input[id=inlineCheckbox12]:checkbox").each(function () {
-                    $(this).prop("checked", false);
-                    $(this).prop("disabled", false);
-                });
-                $("input[id=inlineCheckbox4]:checkbox").each(function () {
-                    $(this).prop("checked", false);
-                    $(this).prop("disabled", false);
-                });
-            }
-        }
+
     </script>
     {#确定修改数据#}
     <script>
@@ -437,23 +443,19 @@
                 data: $('#update_form').serialize(),
                 async: false,
                 success: function (arr) {
-                    if (arr['err'] != '') {
-                        alert(arr['err']);
-                    } else {
-                        window.location.replace('/usermanagement/');
-                    }
+                    alert(arr)
                 }
             })
         }
     </script>
     {#删除数据#}
     <script>
-        function delete_data(mm, sd) {
+        function delete_data(id) {
             $.ajax({
                 url: "/deletes_user/",
                 type: "GET",
                 dataType: 'json',
-                data: {'id': mm},
+                data: {'id': id},
                 async: false,
                 success: function () {
                 }

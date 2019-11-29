@@ -167,7 +167,7 @@ class Usermanagement(View):
         shopss = Shops.objects.filter(deletes=False).all()
         total_account = Total_brank_account.objects.filter(deletes=False).all()
         add_form = Add_user()
-        edit_form = Edit_user()
+        edit_form = Edit_user_form()
         now_time = time.strftime('%Y-%m-%d', time.localtime())
         now_time = get_nday_list2(2, now_time)
         all_account_makes = Total_account_record.objects.filter(datess__date=now_time, makes=False, deletes=False).all()
@@ -271,10 +271,10 @@ class Edit_user(View):
         current_data = Userinfo.objects.filter(id=ids).get()
         msg = json.dumps(
             {'rose': current_data.rouse, 'username': current_data.username, 'passwd': current_data.passwd, 'description': current_data.description,
-             'ids': current_data.id,})
+             'ids': current_data.id, })
         return HttpResponse(msg)
 
-    def post(self,request):
+    def post(self, request):
         user = request.session.get('username')
         rouse = request.session.get('rouse')
         ids = request.POST.get('update_ids')
@@ -339,10 +339,12 @@ class Edit_user(View):
                         ids, usernames, passwds, rouse, descriptions, shops, after_total_accounts)
                     Log.objects.create(operator=operators, operation_type=operation_types, after_operation=after_operations,
                                        before_operation=before_operations)
+                    err_msg = "修改成功"
                 else:
                     err_msg = '必须选择总账户'
             else:
                 err_msg = '必须选择店铺'
+        return HttpResponse(json.dumps(err_msg))
 
 
 def edit_user(request):
