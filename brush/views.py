@@ -1,4 +1,4 @@
-from django.shortcuts import render, HttpResponse, redirect
+from django.shortcuts import render, HttpResponse, redirect,reverse
 from django.views.generic import View
 from brush.models import *
 import time, json, datetime
@@ -100,7 +100,7 @@ def update_passwd(request):
     user = request.session.get('username')
     rouse = request.session.get('rouse')
     if user == None:
-        return redirect(to=Login)
+        return redirect(reverse('login'))
     passwds = request.POST.get('passwd')
     passwd2s = request.POST.get('passwd2')
     if passwds and passwd2s:
@@ -129,7 +129,7 @@ class Usermanagement(View):
         user = request.session.get('username')
         rouse = request.session.get('rouse')
         if user == None:
-            return redirect(to=Login)
+            return redirect(reverse('login'))
         if rouse == '运营':
             return render(request, 'login.html', {'err_msg': '当前账户权限不足，请使用其他账号'})
         title = '用户管理'
@@ -264,7 +264,7 @@ class Edit_user(View):
         user = request.session.get('username')
         rouse = request.session.get('rouse')
         if user == None:
-            return redirect(to=Login)
+            return redirect(reverse('login'))
         if rouse == '运营':
             return render(request, 'login.html', {'err_msg': '当前账户权限不足，请使用其他账号'})
         ids = request.GET.get('id')
@@ -351,7 +351,7 @@ def edit_user(request):
     user = request.session.get('username')
     rouse = request.session.get('rouse')
     if user == None:
-        return redirect(to=Login)
+        return redirect(reverse('login'))
     if rouse == '运营':
         return render(request, 'login.html', {'err_msg': '当前账户权限不足，请使用其他账号'})
     ids = request.GET.get('id')
@@ -476,7 +476,7 @@ def search_total_count(request):
     user = request.session.get('username')
     rouse = request.session.get('rouse')
     if user is None:
-        return redirect(to='login/')
+        return redirect(reverse('login'))
     title = '总账户记录管理'
     total_account_all = Userinfo.objects.filter(username=user, deletes=False).get().total_brank_account.filter(deletes=False).all()
     account2 = Userinfo.objects.filter(username=user, deletes=False).get().total_brank_account.filter(deletes=False).all()

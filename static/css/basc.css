@@ -11,21 +11,22 @@ body {
 #left_nav {
     float: left;
     background-color: #3d3d3d;
-    width: 12%;
+    width: 13%;
     height: 100%;
 }
 
 #content {
     float: left;
-    width: 88%;
+    width: 87%;
     height: 100%;
     background-color: white;
 }
 
 #cont {
-    width: 1400px;
+    float: left;
+    /*width: 90%;*/
     height: 770px;
-    margin: 20px 100px;
+    /*margin: 20px 100px;*/
 }
 
 
