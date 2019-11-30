@@ -81,7 +81,7 @@ DATABASES = {
         # 'NAME': 'brush_wine',
         'NAME': 'brush_2',
         'USER': 'root',
-        'PASSWORD': '123456',
+        'PASSWORD': 'root',
         'HOST': '127.0.0.1',
         'PORT': 3306,
     },
