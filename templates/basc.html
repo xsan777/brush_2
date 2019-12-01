@@ -16,15 +16,20 @@
 <body>
 
 <div id="nav">
-    <div id="logo">宝儿喝酒数据管理系统 <span class="col-md-offset-9" style="font-size: 1.8rem">欢迎，<span class="dropdown">
-        <a href="javascript:void(0); " id="nav_user" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">{{ user }}</a>
-        <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
-            <li><a href=" /" style="font-size:small ">退出</a></li>
-            <li onclick="update_passwd()" data-toggle="#update_passwd_modal"><a href="javascript:void(0);" style="font-size:small "
-                                                                                id="update_passwd">修改密码</a></li>
-        </ul>
-        </span>   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span></div>
+    <div id="logo" class="navbar-left">宝儿喝酒数据管理系统
+    </div>
+    <span class="nav navbar-nav navbar-right" id="logo" style="font-size: 1.8rem">
+        欢迎，
+            <a href="javascript:void(0); " id="nav_user" data-toggle="dropdown"
+               aria-haspopup="true" aria-expanded="false">{{ user }}</a>
+            <ul class="dropdown-menu" aria-labelledby="dropdownMenu1">
+                <li><a href="{% url 'login' %}" style="font-size:small ">退出</a></li>
+                <li onclick="update_passwd()" data-toggle="#update_passwd_modal"><a href="javascript:void(0);"
+                                                                                    style="font-size:small"
+                                                                                    id="update_passwd">修改密码</a></li>
+            </ul>
 
+    </span>
 </div>
 {#左侧导航#}
 <div id="left_nav">
@@ -113,7 +118,8 @@
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span>
+                </button>
                 <h4 class="modal-title" id="myModalLabel">修改密码</h4>
             </div>
             <div class="modal-body">
